@@ -277,6 +277,9 @@
                         let h_tag = '<span class="high highGreen"><div class="hovbox">Relevant Span</div>replace</span>'
                         h_tag = h_tag.replace("replace", this.tabs[i].doc_claim);
                         console.log(this.tabs[i].doc_claim);
+                        if (!this.tabs[i].doc.contains(this.tabs[i].doc_claim)){
+                            h_tag = h_tag.replace("=", " = ");
+                        }
                         return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
                     }
                 }
