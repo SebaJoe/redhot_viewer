@@ -275,11 +275,11 @@
                 for (let i = 0; i < this.tabs.length; i++) {
                     if (this.tabs[i].isActive) {
                         let h_tag = '<span class="high highGreen"><div class="hovbox">Relevant Span</div>replace</span>'
+                        if (!this.tabs[i].doc.contains(this.tabs[i].doc_claim)){
+                            this.tabs[i].doc_claim = this.tabs[i].doc_claim.replace("=", " = ");
+                        }
                         h_tag = h_tag.replace("replace", this.tabs[i].doc_claim);
                         console.log(this.tabs[i].doc_claim);
-                        if (!this.tabs[i].doc.contains(this.tabs[i].doc_claim)){
-                            h_tag = h_tag.replace("=", " = ");
-                        }
                         return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
                     }
                 }
