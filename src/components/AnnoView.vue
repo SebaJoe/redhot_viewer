@@ -96,6 +96,8 @@
         },
         methods: {
             readfile() {
+                this.redhot_post = "";
+                this.tabs = [];
                 this.file = this.$refs.doc.files[0];
                 const reader = new FileReader();
                 if(this.file.name.includes('.json')) {
@@ -122,62 +124,118 @@
             },
             load_file() {
                 this.redhot_post = this.parsed_file[this.findex].text;
-                const stage_1 = JSON.parse(this.parsed_file[this.findex].stage1_labels)[0]['crowd-entity-annotation']['entities'];
-                let stage_1_tag = '<span class="high highYellow" ><div class="hovbox">replace</div>';
-                let end_label = '</span>'
+                let end_label = '</span>';
                 const stage_2 = JSON.parse(this.parsed_file[this.findex].stage2_labels)[0]['crowd-entity-annotation']['entities'];
                 let stage_2_tag = '<span class="high highBlue"><div class="hovbox">replace</div>';
-                for (let i = 0; i < stage_1.length; i++) {
-                    //wrap span with span
-                    let start = stage_1[i].startOffset;
-                    let end = stage_1[i].endOffset;
-                    let label = stage_1[i].label;
-                    console.log(label);
+                console.log(Object.keys(this.parsed_file[this.findex]));
+                if (Object.keys(this.parsed_file[this.findex]).includes("stage1_labels")) {
+                    const stage_1 = JSON.parse(this.parsed_file[this.findex].stage1_labels)[0]['crowd-entity-annotation']['entities'];
+                    let stage_1_tag = '<span class="high highYellow" ><div class="hovbox">replace</div>';
+                    for (let i = 0; i < stage_1.length; i++) {
+                        //wrap span with span
+                        let start = stage_1[i].startOffset;
+                        let end = stage_1[i].endOffset;
+                        let label = stage_1[i].label;
+                        console.log(label);
 
-                    console.log(stage_1);
-                    console.log(this.redhot_post.slice(start, end));
+                        console.log(stage_1);
+                        console.log(this.redhot_post.slice(start, end));
 
-                    console.log(label);
-                    let stage_1_tag_mod = stage_1_tag.replace('replace', label);
-                    console.log(end_label);
+                        console.log(label);
+                        let stage_1_tag_mod = stage_1_tag.replace('replace', label);
+                        console.log(end_label);
 
-                    if (this.redhot_post.slice(start, end).trim() === this.parsed_file[this.findex].claim_x.trim()) {
-                        stage_1_tag_mod = stage_1_tag_mod.replace('highYellow', 'highdYellow');
-                        stage_1_tag_mod = stage_1_tag_mod.replace(label, label + " (target)");
-                    }
+                        let comp_claim = "";
+                        
+                        console.log(Object.keys(this.parsed_file));
 
-                    console.log("ANALYZE");
-                    console.log(this.redhot_post.slice(start, end));
-                    console.log(this.parsed_file[this.findex].claim_x);
-
-                    this.redhot_post = this.redhot_post.slice(0, start) 
-                                        + stage_1_tag_mod 
-                                        + this.redhot_post.slice(start, end)
-                                        + end_label
-                                        + this.redhot_post.slice(end);
-                    for (let j = i + 1; j < stage_1.length; j++) {
-                        let j_start = stage_1[j].startOffset;
-                        let j_end = stage_1[j].endOffset;
-                        const get_update_func = (val, start, end, startLen, endLen) => {
-                            if (val >= start && val <= end) return val + startLen;
-                            else if (val >= start) return val + startLen + endLen;
-                            else return val;
+                        if (Object.keys(this.parsed_file[this.findex]).includes('claim_x')) {
+                            comp_claim = this.parsed_file[this.findex].claim_x.trim();
+                        } else {
+                            comp_claim = this.parsed_file[this.findex].claim.trim();
                         }
-                        stage_1[j].startOffset = get_update_func(j_start, start, end, stage_1_tag_mod.length, end_label.length);
-                        stage_1[j].endOffset = get_update_func(j_end, start, end, stage_1_tag_mod.length, end_label.length)
-                    }
-                    for (let j = 0; j < stage_2.length; j++) {
-                        let j_start = stage_2[j].startOffset;
-                        let j_end = stage_2[j].endOffset;
-                        const get_update_func = (val, start, end, startLen, endLen) => {
-                            if (val >= start && val <= end) return val + startLen;
-                            else if (val >= start) return val + startLen + endLen;
-                            else return val;
+
+                        const levenshteinDistance = (s, t) => {
+                            if (!s.length) return t.length;
+                            if (!t.length) return s.length;
+                            const arr = [];
+                            for (let i = 0; i <= t.length; i++) {
+                                arr[i] = [i];
+                                for (let j = 1; j <= s.length; j++) {
+                                arr[i][j] =
+                                    i === 0
+                                    ? j
+                                    : Math.min(
+                                        arr[i - 1][j] + 1,
+                                        arr[i][j - 1] + 1,
+                                        arr[i - 1][j - 1] + (s[j - 1] === t[i - 1] ? 0 : 1)
+                                        );
+                                }
+                            }
+                            return arr[t.length][s.length];
+                        };  
+
+                        if (levenshteinDistance(this.redhot_post.slice(start, end).trim(), comp_claim) < 5) {
+                            stage_1_tag_mod = stage_1_tag_mod.replace('highYellow', 'highdYellow');
+                            stage_1_tag_mod = stage_1_tag_mod.replace(label, label + " (target)");
                         }
-                        stage_2[j].startOffset = get_update_func(j_start, start, end, stage_1_tag_mod.length, end_label.length);
-                        stage_2[j].endOffset = get_update_func(j_end, start, end, stage_1_tag_mod.length, end_label.length)
+
+                        console.log("ANALYZE");
+                        console.log(this.redhot_post.slice(start, end));
+                        console.log(this.parsed_file[this.findex].claim);
+
+                        this.redhot_post = this.redhot_post.slice(0, start) 
+                                            + stage_1_tag_mod 
+                                            + this.redhot_post.slice(start, end)
+                                            + end_label
+                                            + this.redhot_post.slice(end);
+                        for (let j = i + 1; j < stage_1.length; j++) {
+                            let j_start = stage_1[j].startOffset;
+                            let j_end = stage_1[j].endOffset;
+                            const get_update_func = (val, start, end, startLen, endLen) => {
+                                if (val >= start && val <= end) return val + startLen;
+                                else if (val >= start) return val + startLen + endLen;
+                                else return val;
+                            }
+                            stage_1[j].startOffset = get_update_func(j_start, start, end, stage_1_tag_mod.length, end_label.length);
+                            stage_1[j].endOffset = get_update_func(j_end, start, end, stage_1_tag_mod.length, end_label.length)
+                        }
+                        for (let j = 0; j < stage_2.length; j++) {
+                            let j_start = stage_2[j].startOffset;
+                            let j_end = stage_2[j].endOffset;
+                            const get_update_func = (val, start, end, startLen, endLen) => {
+                                if (val >= start && val <= end) return val + startLen;
+                                else if (val >= start) return val + startLen + endLen;
+                                else return val;
+                            }
+                            stage_2[j].startOffset = get_update_func(j_start, start, end, stage_1_tag_mod.length, end_label.length);
+                            stage_2[j].endOffset = get_update_func(j_end, start, end, stage_1_tag_mod.length, end_label.length)
+                        }
                     }
-                }
+                } else {
+                    let stage_1_tag = '<span class="high highdYellow"><div class="hovbox">Claim (target)</div>';
+                    let comp_claim = this.parsed_file[this.findex].claim.trim();
+                    let start = this.redhot_post.indexOf(comp_claim);
+                    if (start != -1) {
+                        let end = start + comp_claim.length;
+                        this.redhot_post = this.redhot_post.slice(0, start) 
+                                            + stage_1_tag 
+                                            + this.redhot_post.slice(start, end)
+                                            + end_label
+                                            + this.redhot_post.slice(end);
+                        for (let j = 0; j < stage_2.length; j++) {
+                            let j_start = stage_2[j].startOffset;
+                            let j_end = stage_2[j].endOffset;
+                            const get_update_func = (val, start, end, startLen, endLen) => {
+                                if (val >= start && val <= end) return val + startLen;
+                                else if (val >= start) return val + startLen + endLen;
+                                else return val;
+                            }
+                            stage_2[j].startOffset = get_update_func(j_start, start, end, stage_1_tag.length, end_label.length);
+                            stage_2[j].endOffset = get_update_func(j_end, start, end, stage_1_tag.length, end_label.length)
+                        }
+                    }
+                }   
                 for (let i = 0; i < stage_2.length; i++) {
                     //wrap span with span
                     let start = stage_2[i].startOffset;
