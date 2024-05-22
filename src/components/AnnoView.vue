@@ -287,6 +287,7 @@
                 let docs = filterKeys('_doc');
                 let titles = filterKeys_s('t');
                 let doc_claims = filterKeys_s('p');
+                let picor_labels = this.parsed_file[this.findex].TS_PICOR;
                 console.log(titles);
                 console.log(doc_claims);
                 let annos = filterKeys('_anno')
@@ -308,6 +309,7 @@
                         title: titles[i],
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
+                        picor_label:picor_labels[i],
                         isActive: false,
                         annot: [{
                             label: "Relevance",
@@ -323,7 +325,12 @@
                     this.tabs[i].isActive = false;
                 }
                 tab.isActive = true;
-            }
+            },
+            highlightPICOR(doc, span, label, classname) {
+                let h_tag = '<span class="high ' + classname + '"><div class="hovbox">'+ label + '</div>replace</span>';
+                h_tag = h_tag.replace("replace", span);
+                return doc.replace(span, h_tag);
+            },
         },
         computed: {
             printPost() {
@@ -332,14 +339,32 @@
             printAbs() {
                 for (let i = 0; i < this.tabs.length; i++) {
                     if (this.tabs[i].isActive) {
-                        let h_tag = '<span class="high highGreen"><div class="hovbox">Relevant Span</div>replace</span>'
-                        if (!this.tabs[i].doc.includes(this.tabs[i].doc_claim)){
-                            //this.tabs[i].doc_claim = this.tabs[i].doc_claim.replaceAll("=", " = ");
-                            console.log("ERROR ALERT");
+                        // let h_tag = '<span class="high highGreen"><div class="hovbox">Relevant Span</div>replace</span>';
+                        // if (!this.tabs[i].doc.includes(this.tabs[i].doc_claim)){
+                        //     //this.tabs[i].doc_claim = this.tabs[i].doc_claim.replaceAll("=", " = ");
+                        //     console.log("ERROR ALERT");
+                        // }
+                        // h_tag = h_tag.replace("replace", this.tabs[i].doc_claim);
+                        // console.log(this.tabs[i].doc_claim);
+                        // return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
+                        let all_h = []
+                        all_h.push({span:this.tabs[i].doc_claim, label:"Relevant Span", cname: "highGreen"});
+                        //all_h.push({span:this.tabs[i].picor_label.Punchline, label:"Punchline", cname: "highBlue"});
+                        let l_labels = ['Population', 'Intervention', 'Outcome'];
+                        for (let lab of l_labels) {
+                            let lab_arr = this.tabs[i].picor_label[lab];
+                            for (let sp of lab_arr) {
+                                all_h.push({span:sp, label:lab, cname:"highBlue"});
+                            }
                         }
-                        h_tag = h_tag.replace("replace", this.tabs[i].doc_claim);
-                        console.log(this.tabs[i].doc_claim);
-                        return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
+                        all_h.sort((a, b) => {
+                            return b.span.length - a.span.length;
+                        });
+                        var doc_copy = (" " + this.tabs[i].doc).slice(1);
+                        for (let h of all_h) {
+                            doc_copy = this.highlightPICOR(doc_copy, h.span, h.label, h.cname);
+                        }
+                        return doc_copy;
                     }
                 }
             }
