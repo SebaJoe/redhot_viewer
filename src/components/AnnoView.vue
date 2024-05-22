@@ -350,11 +350,13 @@
                         let all_h = []
                         all_h.push({span:this.tabs[i].doc_claim, label:"Relevant Span", cname: "highGreen"});
                         //all_h.push({span:this.tabs[i].picor_label.Punchline, label:"Punchline", cname: "highBlue"});
-                        let l_labels = ['Population', 'Intervention', 'Outcome'];
-                        for (let lab of l_labels) {
-                            let lab_arr = this.tabs[i].picor_label[lab];
-                            for (let sp of lab_arr) {
-                                all_h.push({span:sp, label:lab, cname:"highBlue"});
+                        if(Object.keys(this.tabs[i]).includes("picor_label")) {
+                            let l_labels = ['Population', 'Intervention', 'Outcome'];
+                            for (let lab of l_labels) {
+                                let lab_arr = this.tabs[i].picor_label[lab];
+                                for (let sp of lab_arr) {
+                                    all_h.push({span:sp, label:lab, cname:"highBlue"});
+                                }
                             }
                         }
                         all_h.sort((a, b) => {
