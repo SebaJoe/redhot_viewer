@@ -351,11 +351,13 @@
                         all_h.push({span:this.tabs[i].doc_claim, label:"Relevant Span", cname: "highGreen"});
                         //all_h.push({span:this.tabs[i].picor_label.Punchline, label:"Punchline", cname: "highBlue"});
                         if(Object.keys(this.tabs[i]).includes("picor_label")) {
-                            let l_labels = ['Population', 'Intervention', 'Outcome'];
+                            let l_labels = Object.keys(this.tabs[i].picor_label);
                             for (let lab of l_labels) {
-                                let lab_arr = this.tabs[i].picor_label[lab];
-                                for (let sp of lab_arr) {
-                                    all_h.push({span:sp, label:lab, cname:"highBlue"});
+                                if (Array.isArray(this.tabs[i].picor_label[lab])) {
+                                    let lab_arr = this.tabs[i].picor_label[lab];
+                                    for (let sp of lab_arr) {
+                                        all_h.push({span:sp, label:lab, cname:"highBlue"});
+                                    }
                                 }
                             }
                         }
@@ -377,18 +379,18 @@
 <style>
 
     .highYellow {
-        background: rgb(243, 243, 162);
+        background: rgb(243, 243, 162, 0.5);
     }
     .highBlue {
-        background: rgb(173, 173, 250);
+        background: rgb(173, 173, 250, 0.5);
     }
 
     .highGreen {
-        background: rgb(175, 247, 175);
+        background: rgb(175, 247, 175, 0.5);
     }
 
     .highdYellow {
-        background: rgb(209, 249, 151);
+        background: rgb(209, 249, 151, 0.5);
     }
 
     .hovbox {
@@ -401,8 +403,11 @@
         margin-top: -26px;
         background-color: inherit;
         padding: 5px 5px 0px 5px;
+        color: black;
         border-radius: 5px 5px 0px 0px;
         filter: brightness(90%) saturate(200%);
     }
+
+
 
 </style>
