@@ -321,7 +321,7 @@
 
                 if (picor_labels) {
                     for (let i = 0; i < docs.length; i++) {
-                        this.tabs['picor_label'] = picor_labels[i];
+                        this.tabs[i]['picor_label'] = picor_labels[i];
                     }
                 }
 
@@ -376,8 +376,11 @@
                             if (this.$refs.absts) {        
                                 let eles = this.$refs.absts[i].getElementsByClassName('high');           
                                 Array.from(eles).forEach((ele) => {
-                                    ele.addEventListener('mouseover', () => {
-                                        console.log('zoo wee mama');
+                                    ele.addEventListener('mouseover', (e) => {
+                                        console.log(ele.firstChild);
+                                        ele.animate({
+                                            left:  `${e.clientX}px`,
+                                        }, {duration: 1000, fill: 'forwards'});
                                     });
                                     ele.addEventListener('click', () => {
                                         console.log("Oooweee");
