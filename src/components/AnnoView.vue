@@ -35,7 +35,7 @@
                         RedHot Post
                     </div>
                     <div class="card-body">
-                        <span style="white-space: pre-line;" v-html="printPost" ref="cardNode">
+                        <span style="white-space: pre-line;" v-html="redhot_post" ref="postcard">
                         </span>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                             <div class="row">
                             <div class="col">
                                 <h5><strong>{{ tab.title }}</strong></h5>
-                                <p v-html="printAbs">
+                                <p v-html="tab_text" ref="absts">
 
                                 </p>
                             </div>
@@ -90,6 +90,7 @@
                 file: null,
                 parsed_file: [], 
                 redhot_post: "",
+                tab_text: "",
                 tabs: [],
                 findex: -1,
             }
@@ -309,7 +310,6 @@
                         title: titles[i],
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
-                        picor_label:picor_labels[i],
                         isActive: false,
                         annot: [{
                             label: "Relevance",
@@ -318,6 +318,13 @@
                         }]
                     });
                 }
+
+                if (picor_labels) {
+                    for (let i = 0; i < docs.length; i++) {
+                        this.tabs['picor_label'] = picor_labels[i];
+                    }
+                }
+
                 this.setActive(this.tabs[0]);
             },
             setActive(tab) {
@@ -325,16 +332,12 @@
                     this.tabs[i].isActive = false;
                 }
                 tab.isActive = true;
+                this.printAbs();
             },
             highlightPICOR(doc, span, label, classname) {
                 let h_tag = '<span class="high ' + classname + '"><div class="hovbox">'+ label + '</div>replace</span>';
                 h_tag = h_tag.replace("replace", span);
                 return doc.replace(span, h_tag);
-            },
-        },
-        computed: {
-            printPost() {
-                return this.redhot_post;
             },
             printAbs() {
                 for (let i = 0; i < this.tabs.length; i++) {
@@ -368,10 +371,30 @@
                         for (let h of all_h) {
                             doc_copy = this.highlightPICOR(doc_copy, h.span, h.label, h.cname);
                         }
-                        return doc_copy;
+                        this.tab_text = doc_copy;
+                        const interval = setInterval(() => {      
+                            if (this.$refs.absts) {        
+                                let eles = this.$refs.absts[i].getElementsByClassName('high');           
+                                Array.from(eles).forEach((ele) => {
+                                    ele.addEventListener('mouseover', () => {
+                                        console.log('zoo wee mama');
+                                    });
+                                    ele.addEventListener('click', () => {
+                                        console.log("Oooweee");
+                                    });
+                                });
+                                clearInterval(interval);      
+                            }    
+                        }, 50);
+                        break;
                     }
                 }
             }
+        },
+        computed: {
+            printPost() {
+                return this.redhot_post;
+            },
         }
     }
 </script>
