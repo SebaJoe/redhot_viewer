@@ -83,7 +83,9 @@
 
 
 <script>
-    import $ from 'jquery'
+    //import { invokeArrayFns } from '@vue/shared';
+//import $ from 'jquery'
+//import { l } from 'vite/dist/node/types.d-aGj9QkWt';
     export default {
         data() {
             return {
@@ -266,6 +268,15 @@
                         stage_2[j].endOffset = get_update_func(j_end, start, end, stage_2_tag_mod.length, end_label.length)
                     }
                 }
+
+                const interval = setInterval(() => {      
+                    if (this.$refs.postcard) {        
+                        let eles = this.$refs.postcard.getElementsByClassName('high');           
+                        this.triggerHoverEvents(eles);
+                        clearInterval(interval);      
+                    }    
+                }, 50);
+
                 const filterKeys = (suff) => {
                     var filtered = [];
                     var keys = Object.keys(this.parsed_file[this.findex]).filter((key) => key.endsWith(suff)).sort((a, b) => {parseInt(a.slice(1)) - parseInt(b.slice(1))});
@@ -375,23 +386,47 @@
                         const interval = setInterval(() => {      
                             if (this.$refs.absts) {        
                                 let eles = this.$refs.absts[i].getElementsByClassName('high');           
-                                Array.from(eles).forEach((ele) => {
-                                    ele.addEventListener('mouseover', (e) => {
-                                        console.log(ele.firstChild);
-                                        ele.animate({
-                                            left:  `${e.clientX}px`,
-                                        }, {duration: 1000, fill: 'forwards'});
-                                    });
-                                    ele.addEventListener('click', () => {
-                                        console.log("Oooweee");
-                                    });
-                                });
+                                this.triggerHoverEvents(eles);
                                 clearInterval(interval);      
                             }    
                         }, 50);
                         break;
                     }
                 }
+            },
+            triggerHoverEvents(eles) {
+                Array.from(eles).forEach((ele) => {
+                    ele.addEventListener('mouseenter', (e) => {
+                        console.log(ele === e.target);
+
+                        Array.from(eles).forEach((q) => {
+                            q.firstChild.style.left = "";
+                            q.firstChild.style.top = "";
+                            q.firstChild.style['border-radius'] = "";
+                        });
+
+                        
+                        
+                        e.stopPropagation();
+                        console.log(ele.firstChild);
+                        ele.firstChild.style.left = 0 + "px";
+                        ele.firstChild.style.top = 0 + 'px';
+                        let clientRect = ele.firstChild.getBoundingClientRect();
+
+                        ele.firstChild.style.left = (e.clientX - clientRect.left) + "px";
+                        ele.firstChild.style.top = (e.clientY - clientRect.top - clientRect.height) + 'px';
+                        ele.firstChild.style['border-radius'] = '5px';
+                        
+                    });
+                    ele.addEventListener('mouseleave', (e) => {
+                        e.stopPropagation();
+                        //ele.firstChild.style.left = 0 + "px";
+                        //ele.firstChild.style.top = 0 + 'px';
+                        ele.firstChild.style.left = "";
+                        ele.firstChild.style.top = '';
+                        ele.firstChild.style['border-radius'] = '';
+                    });
+                });
             }
         },
         computed: {
@@ -405,18 +440,18 @@
 <style>
 
     .highYellow {
-        background: rgb(243, 243, 162, 0.5);
+        background: rgb(243, 243, 162, 0.9);
     }
     .highBlue {
-        background: rgb(173, 173, 250, 0.5);
+        background: rgb(173, 173, 250, 0.9);
     }
 
     .highGreen {
-        background: rgb(175, 247, 175, 0.5);
+        background: rgb(175, 247, 175, 0.9);
     }
 
     .highdYellow {
-        background: rgb(209, 249, 151, 0.5);
+        background: rgb(209, 249, 151, 0.9);
     }
 
     .hovbox {
