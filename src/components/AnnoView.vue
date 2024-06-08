@@ -41,6 +41,84 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mt-3" v-if="claim_selected">
+            <div class="col">
+                <div class="card" style="background-color:#F0F1FF;">
+                    <div class="card-header text-muted">
+                        Selected Claim
+                    </div>
+                    <div class="card-body">
+                        <div class="row border-bottom">
+                            <div class="col pb-3">
+                                <span style="white-space: pre-line;">
+                                    {{ selected_claim }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
+                                    <template #item="{element}">
+                                        <div class="list-group-item" style="background-color: #F8FFF0;">{{ element.label }}</div>
+                                    </template>
+                                </draggable>
+                            </div>
+                        </div>
+                        <div class="row mt-2" v-for="tier in tiers">
+                            <div class="col"> 
+                                <div class="card" style="background-color:  #F0F8FF;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 d-flex justify-content-center">
+                                                T{{ tier.rank }}
+                                            </div>
+                                            <div class="col border">
+                                                <draggable class="list-group list-group-horizontal" :list="tier.t_lst" group="docs" itemKey="label">
+                                                    <template #item="{element}">
+                                                        <div class="list-group-item">{{ element.label }}</div>
+                                                    </template>
+                                                </draggable>
+                                            </div>
+                                            <div class="col-sm-1 d-flex justify-content-center" @click="toggleTier(tier)">
+                                                <i class="bi bi-chevron-down" v-if="tier.send_down"></i>
+                                                <i class="bi bi-chevron-up" v-else></i>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3" v-show="tier.send_down">
+                                            <div class="col-sm-3">
+                                                <select class="custom-select">
+                                                    <option selected>Select one</option>
+                                                    <option value="1">Relevant</option>
+                                                    <option value="2">Somewhat Relevant</option>
+                                                    <option value="3">Irrelevant</option>
+                                                </select>
+                                            </div>
+                                            <div class="col">
+                                                <input type="text" class="form-control" placeholder="Description/Label">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col d-flex justify-content-center">
+                                <button class="btn-sm btn-secondary" @click="addTier()">
+                                    Add Tier
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col d-flex justify-content-center">
+                                <textarea class="form-control" rows="3" placeholder="Overall Explanation"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row mt-3">
             <div class="col">
                 <div class="card">
@@ -83,10 +161,14 @@
 
 
 <script>
+    import draggable from "vuedraggable";
     //import { invokeArrayFns } from '@vue/shared';
 //import $ from 'jquery'
 //import { l } from 'vite/dist/node/types.d-aGj9QkWt';
     export default {
+        components: {
+            draggable
+        },
         data() {
             return {
                 file: null,
@@ -94,7 +176,27 @@
                 redhot_post: "",
                 tab_text: "",
                 tabs: [],
+                drag_tabs: [],
                 findex: -1,
+                tiers: [
+                    {
+                        rank: 1,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                    {
+                        rank: 2,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                    {
+                        rank: 3,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                ],
+                claim_selected: false,
+                selected_claim: "",
             }
         },
         methods: {
@@ -125,7 +227,33 @@
                     this.load_file();
                 }
             },
+            set_defaults() {
+                this.redhot_post = "";
+                this.tab_text = "";
+                this.tabs = [];
+                this.drag_tabs = [];
+                this.tiers = [
+                    {
+                        rank: 1,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                    {
+                        rank: 2,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                    {
+                        rank: 3,
+                        t_lst: [],
+                        send_down: false,
+                    },
+                ];
+                this.claim_selected = false;
+                this.selected_claim = "";
+            },
             load_file() {
+                this.set_defaults();
                 this.redhot_post = this.parsed_file[this.findex].text;
                 let end_label = '</span>';
                 const stage_2 = JSON.parse(this.parsed_file[this.findex].stage2_labels)[0]['crowd-entity-annotation']['entities'];
@@ -273,6 +401,27 @@
                     if (this.$refs.postcard) {        
                         let eles = this.$refs.postcard.getElementsByClassName('high');           
                         this.triggerHoverEvents(eles);
+                        let s_claim = this.$refs.postcard.getElementsByClassName('highdYellow');
+                        Array.from(s_claim).forEach((sc) => {
+                            sc.addEventListener('click', (e) => {
+                                if (e.target.style.border !== "") {
+                                    Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
+                                    this.claim_selected = false;
+                                    this.selected_claim = "";
+                                } else {
+                                    Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
+                                    console.log(sc.innerHTML);
+                                    let temp = document.createElement('div');
+                                    temp.innerHTML = sc.innerHTML;
+                                    const divs = temp.querySelectorAll('div');
+                                    divs.forEach(div => div.remove());
+                                    this.selected_claim = temp.textContent;
+                                    this.claim_selected = true;
+                                    sc.style.border = "2px solid #6aa84f";
+                                    sc.style['border-radius'] = '5px';
+                                }
+                            });
+                        });
                         clearInterval(interval);      
                     }    
                 }, 50);
@@ -304,12 +453,15 @@
                 console.log(doc_claims);
                 let annos = filterKeys('_anno')
                 this.tabs = [];
+                this.drag_tabs = [];
                 let relvance_dict = {
+                    0: "N/A",
                     1: "Relevant",
                     2: "Somewhat Relevant",
                     3: "Irrelevant"
                 }
                 let r_class_dict = {
+                    0: "btn-outline-secondary",
                     1: "btn-outline-success",
                     2: "btn-outline-warning",
                     3: "btn-outline-danger"
@@ -335,7 +487,7 @@
                         this.tabs[i]['picor_label'] = picor_labels[i];
                     }
                 }
-
+                this.drag_tabs = JSON.parse(JSON.stringify(this.tabs));
                 this.setActive(this.tabs[0]);
             },
             setActive(tab) {
@@ -427,6 +579,18 @@
                         ele.firstChild.style['border-radius'] = '';
                     });
                 });
+            },
+            toggleTier(tier) {
+                tier.send_down = !tier.send_down;
+            },
+            addTier() {
+                this.tiers.push(
+                    {
+                        rank: this.tiers.length + 1,
+                        t_lst: [],
+                        send_down: false,
+                    }
+                );
             }
         },
         computed: {
