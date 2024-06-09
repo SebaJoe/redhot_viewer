@@ -7,24 +7,26 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col">
-                <input type="file" ref="doc" @change="readfile()"/>
+            <div class="col-3">
+                <input class="form-control" type="file" ref="doc" @change="readfile()"/>
             </div>
             <div class="col">
-                <button class="btn btn-light" @click="dec_findex()">
+                <button class="btn btn-light float-right" @click="dec_findex()">
                     <i class="bi bi-chevron-left"></i>
                 </button>
             </div>
-            <div class="col">
+            <div class="col d-flex justify-content-center">
                 <h4>{{ findex+1 }} / {{ parsed_file.length }}</h4>
             </div>
             <div class="col">
-                <button class="btn btn-light" @click="inc_findex()">
+                <button class="btn btn-light float-left" @click="inc_findex()">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
-            <div class="col">
-
+            <div class="col-3">
+                <button class="btn btn-outline-secondary float-right" @click="download_parsed_file()">
+                    Download
+                </button>
             </div>
         </div>
 
@@ -87,15 +89,15 @@
                                         </div>
                                         <div class="row mt-3" v-show="tier.send_down">
                                             <div class="col-sm-3">
-                                                <select class="custom-select">
-                                                    <option selected>Select one</option>
+                                                <select class="custom-select rev-select" v-model="tier.selected">
+                                                    <option value="0">Select one</option>
                                                     <option value="1">Relevant</option>
                                                     <option value="2">Somewhat Relevant</option>
                                                     <option value="3">Irrelevant</option>
                                                 </select>
                                             </div>
                                             <div class="col">
-                                                <input type="text" class="form-control" placeholder="Description/Label">
+                                                <input type="text" class="form-control" placeholder="Description/Label" v-model="tier.description">
                                             </div>
                                         </div>
                                     </div>
@@ -111,7 +113,7 @@
                         </div>
                         <div class="row mt-3">
                             <div class="col d-flex justify-content-center">
-                                <textarea class="form-control" rows="3" placeholder="Overall Explanation"></textarea>
+                                <textarea class="form-control" rows="3" placeholder="Overall Explanation" v-model="o_exp"></textarea>
                             </div>
                         </div>
                     </div>
@@ -140,15 +142,29 @@
                                 </p>
                             </div>
                             <div class="col-4 border-left">
-                                <h5>Annotations:</h5>
+                                <!-- <h5>Annotations:</h5>
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item" v-for="anno in tab.annot">
                                         {{ anno.label }}: &nbsp;    
-                                        <button class="btn btn-sm" :class="[anno.aclass]">
-                                            {{ anno.anno }}
-                                        </button>
+                                        <select class="custom-select" v-model="anno.anno">
+                                            <option v-for="(item, index) in items"  :key="anno.cat">{{ item }}</option>
+                                        </select>
                                     </li>
-                                </ul>
+                                </ul> -->
+                                <div class="row pb-3">
+                                    <div class="col"><h5>Annotations:</h5></div>
+                                </div>
+                                <div class="row pb-2">
+                                    <div class="col"><strong>Relevance</strong></div>
+                                </div>
+                                <div class="row pb-1" v-for="anno in tab.annot">
+                                    <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
+                                    <div class="col-8">
+                                        <select class="custom-select rev-select" v-model="anno.anno">
+                                            <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             </div>
                         </div>
@@ -162,6 +178,7 @@
 
 <script>
     import draggable from "vuedraggable";
+    import download from "downloadjs";
     //import { invokeArrayFns } from '@vue/shared';
 //import $ from 'jquery'
 //import { l } from 'vite/dist/node/types.d-aGj9QkWt';
@@ -173,28 +190,35 @@
             return {
                 file: null,
                 parsed_file: [], 
+                findex: -1,
                 redhot_post: "",
                 tab_text: "",
                 tabs: [],
                 drag_tabs: [],
-                findex: -1,
                 tiers: [
                     {
                         rank: 1,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                     {
                         rank: 2,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                     {
                         rank: 3,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                 ],
+                o_exp: "",
                 claim_selected: false,
                 selected_claim: "",
             }
@@ -216,12 +240,14 @@
                 }
             },
             inc_findex() {
+                this.save_state();
                 if (this.findex < this.parsed_file.length - 1) {
                     this.findex++;
                     this.load_file();
                 }
             },
             dec_findex() {
+                this.save_state();
                 if (this.findex > 0) {
                     this.findex--;
                     this.load_file();
@@ -237,16 +263,22 @@
                         rank: 1,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                     {
                         rank: 2,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                     {
                         rank: 3,
                         t_lst: [],
                         send_down: false,
+                        selected: 0,
+                        description: "",
                     },
                 ];
                 this.claim_selected = false;
@@ -407,7 +439,7 @@
                                 if (e.target.style.border !== "") {
                                     Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
                                     this.claim_selected = false;
-                                    this.selected_claim = "";
+                                    //this.selected_claim = "";
                                 } else {
                                     Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
                                     console.log(sc.innerHTML);
@@ -452,6 +484,11 @@
                 console.log(titles);
                 console.log(doc_claims);
                 let annos = filterKeys('_anno')
+                let annos_present = annos.length === docs.length;
+                let tab_annos = null;
+                if (Object.keys(this.parsed_file[this.findex]).includes("tab_annos")) {
+                    tab_annos = this.parsed_file[this.findex]['tab_annos'];
+                }
                 this.tabs = [];
                 this.drag_tabs = [];
                 let relvance_dict = {
@@ -460,6 +497,12 @@
                     2: "Somewhat Relevant",
                     3: "Irrelevant"
                 }
+                let relevance_arr = [
+                    "N/A",
+                    "Relevant",
+                    "Somewhat Relevant",
+                    "Irrelevant",
+                ]
                 let r_class_dict = {
                     0: "btn-outline-secondary",
                     1: "btn-outline-success",
@@ -474,21 +517,76 @@
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
                         isActive: false,
-                        annot: [{
-                            label: "Relevance",
-                            anno: relvance_dict[annos[i].text],
-                            aclass: r_class_dict[annos[i].text], 
+                        annot: (tab_annos !== null) ? tab_annos[i]:[{
+                            label: "Overall",
+                            anno: (annos_present) ? annos[i].text: 0,
+                            cats: relevance_arr,
+                        },
+                        {
+                            label: "Population",
+                            anno: 0,
+                            cats: relevance_arr,
+                        },
+                        {
+                            label: "Intervention",
+                            anno: 0,
+                            cats: relevance_arr,
+                        },
+                        {
+                            label: "Outcome",
+                            anno: 0,
+                            cats: relevance_arr,
                         }]
                     });
                 }
-
+                console.log(this.tabs);
                 if (picor_labels) {
                     for (let i = 0; i < docs.length; i++) {
                         this.tabs[i]['picor_label'] = picor_labels[i];
                     }
                 }
-                this.drag_tabs = JSON.parse(JSON.stringify(this.tabs));
+
+
+
+                let copy = JSON.parse(JSON.stringify(this.tabs));
+
+                this.drag_tabs = copy;
+
+
+
+                if (Object.keys(this.parsed_file[this.findex]).includes("claim_annos")) {
+                    let claim_annos = this.parsed_file[this.findex]['claim_annos'];
+                    console.log("FOREE");
+                    console.log(claim_annos);
+                    this.drag_tabs = claim_annos['drag_tabs'].map((i) => copy[i]);
+                    this.tiers = [];
+                    for (let i = 0; i < claim_annos['tiers'].length; i++) {
+                        this.tiers.push({
+                            rank: i,
+                            t_lst: claim_annos['tiers'][i]['t_lst'].map((i) => copy[i]),
+                            send_down: claim_annos['tiers'][i]['send_down'],
+                            selected: claim_annos['tiers'][i]['selected'],
+                            description: claim_annos['tiers'][i]['description'],
+                        });
+                    }
+                }
+
                 this.setActive(this.tabs[0]);
+            },
+            save_state() {
+                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => tab.annot);
+                this.parsed_file[this.findex]['claim_annos'] = {};
+                this.parsed_file[this.findex]['claim_annos']['annotated_claim'] = this.selected_claim; 
+                this.parsed_file[this.findex]['claim_annos']['drag_tabs'] = this.drag_tabs.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title));
+                this.parsed_file[this.findex]['claim_annos']['tiers'] = [];
+                for (let i = 0; i < this.tiers.length; i++) {
+                    this.parsed_file[this.findex]['claim_annos']['tiers'].push({
+                        t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
+                        send_down: this.tiers[i].send_down,
+                        selected: this.tiers[i].selected,
+                        description: this.tiers[i].description,
+                    });
+                }
             },
             setActive(tab) {
                 for (let i = 0; i < this.tabs.length; i++) {
@@ -516,13 +614,18 @@
                         let all_h = []
                         all_h.push({span:this.tabs[i].doc_claim, label:"Relevant Span", cname: "highGreen"});
                         //all_h.push({span:this.tabs[i].picor_label.Punchline, label:"Punchline", cname: "highBlue"});
+                        let cname_dict = {
+                            "Population": "highBlue",
+                            "Intervention": "highInter",
+                            "Outcome": "highOut",
+                        };
                         if(Object.keys(this.tabs[i]).includes("picor_label")) {
                             let l_labels = Object.keys(this.tabs[i].picor_label);
                             for (let lab of l_labels) {
                                 if (Array.isArray(this.tabs[i].picor_label[lab])) {
                                     let lab_arr = this.tabs[i].picor_label[lab];
                                     for (let sp of lab_arr) {
-                                        all_h.push({span:sp, label:lab, cname:"highBlue"});
+                                        all_h.push({span:sp, label:lab, cname:cname_dict[lab]});
                                     }
                                 }
                             }
@@ -591,12 +694,22 @@
                         send_down: false,
                     }
                 );
+            },
+            download_parsed_file() {
+                this.save_state();
+                const current_date = new Date();
+                console.log(JSON.parse(JSON.stringify(this.parsed_file)));
+                let end_object = JSON.stringify(this.parsed_file)
+                end_object = end_object.replace(/[\u007F-\uFFFF]/g, function(chr) {
+                                return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+                            });
+                download(end_object, "redhot_parsed_" + current_date.toString().replace(" ", "_") + ".json", 'application/json');
             }
         },
         computed: {
             printPost() {
                 return this.redhot_post;
-            },
+            }
         }
     }
 </script>
@@ -608,6 +721,14 @@
     }
     .highBlue {
         background: rgb(173, 173, 250, 0.9);
+    }
+
+    .highInter {
+        background: rgba(250, 173, 240, 0.9);
+    }
+
+    .highOut {
+        background: rgba(173, 250, 246, 0.9);
     }
 
     .highGreen {
@@ -631,6 +752,20 @@
         color: black;
         border-radius: 5px 5px 0px 0px;
         filter: brightness(90%) saturate(200%);
+    }
+
+    
+    .rev-select option[value="1"] {
+        background: rgb(175, 247, 175, 0.9);
+    }
+
+    .rev-select option[value="2"] {
+        background: rgb(243, 243, 162, 0.9);
+
+    }
+
+    .rev-select option[value="3"] {
+        background: rgba(243, 190, 176, 0.9);
     }
 
 
