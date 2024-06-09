@@ -491,24 +491,12 @@
                 }
                 this.tabs = [];
                 this.drag_tabs = [];
-                let relvance_dict = {
-                    0: "N/A",
-                    1: "Relevant",
-                    2: "Somewhat Relevant",
-                    3: "Irrelevant"
-                }
                 let relevance_arr = [
                     "N/A",
-                    "Relevant",
-                    "Somewhat Relevant",
                     "Irrelevant",
+                    "Somewhat Relevant",
+                    "Relevant",
                 ]
-                let r_class_dict = {
-                    0: "btn-outline-secondary",
-                    1: "btn-outline-success",
-                    2: "btn-outline-warning",
-                    3: "btn-outline-danger"
-                }
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
                     this.tabs.push({
