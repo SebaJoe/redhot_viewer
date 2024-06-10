@@ -62,7 +62,7 @@
                             <div class="col">
                                 <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
                                     <template #item="{element}">
-                                        <div class="list-group-item" style="background-color: #F8FFF0;">{{ element.label }}</div>
+                                        <div class="list-group-item" v-on:dblclick="setActive_w_label(element.label)" style="background-color: #F8FFF0;">{{ element.label }}</div>
                                     </template>
                                 </draggable>
                             </div>
@@ -78,7 +78,7 @@
                                             <div class="col border">
                                                 <draggable class="list-group list-group-horizontal" :list="tier.t_lst" group="docs" itemKey="label">
                                                     <template #item="{element}">
-                                                        <div class="list-group-item">{{ element.label }}</div>
+                                                        <div class="list-group-item" v-on:dblclick="setActive_w_label(element.label)">{{ element.label }}</div>
                                                     </template>
                                                 </draggable>
                                             </div>
@@ -172,6 +172,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -581,6 +582,12 @@
                     this.tabs[i].isActive = false;
                 }
                 tab.isActive = true;
+                this.printAbs();
+            },
+            setActive_w_label(tab_label) {
+                for (let i = 0; i < this.tabs.length; i++) {
+                    this.tabs[i].isActive = (this.tabs[i].label === tab_label);
+                }
                 this.printAbs();
             },
             highlightPICOR(doc, span, label, classname) {
