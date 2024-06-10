@@ -506,11 +506,7 @@
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
                         isActive: false,
-                        annot: (tab_annos !== null) ? tab_annos[i]:[{
-                            label: "Overall",
-                            anno: (annos_present) ? annos[i].text: 0,
-                            cats: relevance_arr,
-                        },
+                        annot: (tab_annos !== null) ? tab_annos[i]:[
                         {
                             label: "Population",
                             anno: 0,
@@ -525,7 +521,13 @@
                             label: "Outcome",
                             anno: 0,
                             cats: relevance_arr,
-                        }]
+                        },
+                        {
+                            label: "Overall",
+                            anno: (annos_present) ? annos[i].text: 0,
+                            cats: relevance_arr,
+                        }
+                        ]
                     });
                 }
                 console.log(this.tabs);
