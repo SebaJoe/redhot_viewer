@@ -262,7 +262,7 @@
                 support_labels: [
                     "N/A",
                     "Refutes",
-                    "Inconclusive",
+                    "Conditional Support",
                     "Supports",
                 ],
                 claim_selected: false,
