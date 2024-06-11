@@ -62,59 +62,80 @@
                             <div class="col">
                                 <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
                                     <template #item="{element}">
-                                        <div class="list-group-item" v-on:dblclick="setActive_w_label(element.label)" style="background-color: #F8FFF0;">{{ element.label }}</div>
+                                        <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @click="stop_sorting()">{{ element.label }}</div>
                                     </template>
                                 </draggable>
                             </div>
                         </div>
-                        <div class="row mt-2" v-for="(tier, index) in tiers">
-                            <div class="col"> 
-                                <div class="card" style="background-color:  #F0F8FF;">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-sm-1 d-flex justify-content-center">
-                                                T{{ index + 1 }}
-                                            </div>
-                                            <div class="col border">
-                                                <draggable class="list-group list-group-horizontal" :list="tier.t_lst" group="docs" itemKey="label">
-                                                    <template #item="{element}">
-                                                        <div class="list-group-item" v-on:dblclick="setActive_w_label(element.label)">{{ element.label }}</div>
-                                                    </template>
-                                                </draggable>
-                                            </div>
-                                            <div class="col-sm-1 d-flex justify-content-center" @click="toggleTier(tier)">
-                                                <i class="bi bi-chevron-down" v-if="tier.send_down"></i>
-                                                <i class="bi bi-chevron-up" v-else></i>
-                                            </div>
-                                            <div class="col-xs-1">
-                                                <i class="bi bi-three-dots-vertical dot-color"></i>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3" v-show="tier.send_down">
-                                            <div class="col-sm-3">
-                                                <select class="custom-select rev-select" v-model="tier.selected">
-                                                    <option value="0">Select one</option>
-                                                    <option value="1">Relevant</option>
-                                                    <option value="2">Somewhat Relevant</option>
-                                                    <option value="3">Irrelevant</option>
-                                                </select>
-                                            </div>
-                                            <div class="col">
-                                                <input type="text" class="form-control" placeholder="Description/Label" v-model="tier.description">
+                        <draggable tag="div" :list="tiers" handle=".handle" item-key="tier">
+                            <template #item="{ element, index }">
+                                <div class="row mt-2">
+                                    <div class="col"> 
+                                        <div class="card" style="background-color:  #F0F8FF;">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-1 d-flex justify-content-center">
+                                                        T{{ index + 1 }}
+                                                    </div>
+                                                    <div class="col border">
+                                                        <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
+                                                            <template #item="{element}">
+                                                                <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @click="stop_sorting()">{{ element.label }}</div>
+                                                            </template>
+                                                        </draggable>
+                                                    </div>
+                                                    <div class="col-sm-1 d-flex justify-content-center" @click="deleteTier(index)">
+                                                        <i class="bi bi-trash-fill dot-color"></i>
+                                                    </div>
+                                                    <div class="col-xs-1 handle">
+                                                        <i class="bi bi-three-dots-vertical dot-color"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
+                                                            </div>
+                                                            <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </template>
+                        </draggable>
                         <div class="row mt-2">
                             <div class="col d-flex justify-content-center">
-                                <button class="btn-sm btn-secondary" @click="addTier()">
+                                <button class="btn-sm btn-secondary mr-2" @click="addTier()">
                                     Add Tier
+                                </button>
+                                <button class="btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance">
+                                    Stop Sorting
+                                </button>
+                                <button class="btn-sm btn-success" @click="toggleSort()" v-else>
+                                    Sort By Relevance
                                 </button>
                             </div>
                         </div>
+                        <div class="row mt-4">
+                            <div class="col">
+                                <h5>Systhesis Annotations:</h5>
+                            </div>
+                        </div>
                         <div class="row mt-3">
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                                    </div>
+                                    <select class="custom-select rev-select" id="inputGroupSelect01" v-model="o_support_label" >
+                                        <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col d-flex justify-content-center">
                                 <textarea class="form-control" rows="3" placeholder="Overall Explanation" v-model="o_exp"></textarea>
                             </div>
@@ -160,18 +181,32 @@
                                 <div class="row pb-2">
                                     <div class="col"><strong>Relevance</strong></div>
                                 </div>
-                                <template v-for="(anno, index) in tab.annot">
-                                    <div class="row pb-1" v-if="look_back(index, tab.annot)" :key="index">
-                                        <!-- <div v-if="look_back(index, tab.annot)"> -->
-                                            <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
-                                            <div class="col-8">
-                                                <select class="custom-select rev-select" v-model="anno.anno">
-                                                    <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
-                                                </select>
-                                            </div>
-                                        <!-- </div> -->
+                                <div class="row pb-1" v-for="(anno, index) in tab.rel_anno">
+                                    <!-- <div v-if="look_back(index, tab.annot)"> -->
+                                    <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
+                                    <div class="col-8">
+                                        <select class="custom-select rev-select" v-model="anno.anno" @change="update_tiers(anno, tab)">
+                                            <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
+                                        </select>
                                     </div>
-                                </template>
+                                    <!-- </div> -->
+                                </div>
+                                <div class="row pb-2" v-if="tab.claim_active">
+                                    <div class="col"><strong>Claim Support</strong></div>
+                                </div>
+                                <div class="row pb-1" v-if="tab.claim_active">
+                                    <div class="col" style="padding-top:7px;">{{ tab.claim_anno.label }}:</div>
+                                    <div class="col-8">
+                                        <select class="custom-select rev-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)">
+                                            <option v-for="(cat, index) in tab.claim_anno.cats" v-bind:value="index">{{ cat }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row pb-1" v-if="tab.claim_active">
+                                    <div class="col">
+                                        <textarea class="form-control" rows="3" placeholder="Explanation for Support Label" v-model="tab.claim_exp"></textarea>
+                                    </div>
+                                </div>
                             </div>
                             </div>
                         </div>
@@ -202,41 +237,57 @@
                 redhot_post: "",
                 tab_text: "",
                 tabs: [],
+                test_color: "rgb(175, 247, 175, 0.9)",
                 drag_tabs: [],
                 tiers: [
                     {
                         rank: 1,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                     {
                         rank: 2,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                     {
                         rank: 3,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                 ],
+                support_colors: {},
                 o_exp: "",
+                o_support_label: 0,
+                support_labels: [
+                    "N/A",
+                    "Refutes",
+                    "Inconclusive",
+                    "Supports",
+                ],
                 claim_selected: false,
+                sort_by_relevance: true,
                 selected_claim: "",
             }
         },
         methods: {
-            look_back(ind, annot) {
+            look_back(ind, annot, tab) {
                 if (ind == 0) return true;
                 if (!Object.keys(annot[ind]).includes("activate_if")) return true;
-                if (annot[ind - 1].anno === annot[ind].activate_if) return true;
+                if (annot[ind - 1].anno === annot[ind].activate_if) {
+                    tab.doc_exp_active = true;
+                    return true;
+                } else {
+                    tab.doc_exp_active = false;
+                }
                 return false;
+            },
+            stop_sorting() {
+                this.sort_by_relevance = false;
+            },
+            toggleSort() {
+                this.sort_by_relevance = !this.sort_by_relevance;
+                if (this.sort_by_relevance) this.update_tiers();
             },
             readfile() {
                 this.redhot_post = "";
@@ -276,22 +327,16 @@
                     {
                         rank: 1,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                     {
                         rank: 2,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                     {
                         rank: 3,
                         t_lst: [],
-                        send_down: false,
-                        selected: 0,
                         description: "",
                     },
                 ];
@@ -471,7 +516,6 @@
                         clearInterval(interval);      
                     }    
                 }, 50);
-
                 const filterKeys = (suff) => {
                     var filtered = [];
                     var keys = Object.keys(this.parsed_file[this.findex]).filter((key) => key.endsWith(suff)).sort((a, b) => {parseInt(a.slice(1)) - parseInt(b.slice(1))});
@@ -511,21 +555,23 @@
                     "Somewhat Relevant",
                     "Relevant",
                 ];
-                let support_arr = [
-                    "N/A",
-                    "Refutes",
-                    "Inconclusive",
-                    "Supports",
-                ];
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
+                    this.support_colors[docs[i]['label']] = "";
                     this.tabs.push({
                         label: docs[i]["label"],
                         title: titles[i],
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
                         isActive: false,
-                        annot: (tab_annos !== null) ? tab_annos[i]:[
+                        claim_exp: (tab_annos !== null) ? tab_annos[i]["doc_exp"]: "",
+                        claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
+                        claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
+                            label: "Label",
+                            anno: 0,
+                            cats: this.support_labels,
+                        },
+                        rel_anno: (tab_annos !== null) ? tab_annos[i]["rel_anno"]:[
                         {
                             label: "Population",
                             anno: 0,
@@ -546,12 +592,6 @@
                             anno: (annos_present) ? annos[i].text: 0,
                             cats: relevance_arr,
                         },
-                        {
-                            label: "Claim Support",
-                            anno: 0,
-                            cats: support_arr,
-                            activate_if: 3,
-                        }
                         ]
                     });
                 }
@@ -562,8 +602,6 @@
                     }
                 }
 
-
-
                 let copy = JSON.parse(JSON.stringify(this.tabs));
 
                 this.drag_tabs = copy;
@@ -572,16 +610,18 @@
 
                 if (Object.keys(this.parsed_file[this.findex]).includes("claim_annos")) {
                     let claim_annos = this.parsed_file[this.findex]['claim_annos'];
+                    this.sort_by_relevance = claim_annos['sort_by_relevance'];
                     console.log("FOREE");
                     console.log(claim_annos);
                     this.drag_tabs = claim_annos['drag_tabs'].map((i) => copy[i]);
                     this.tiers = [];
+                    this.support_colors = claim_annos['support_colors'];
+                    this.o_exp = claim_annos['o_exp'];
+                    this.o_support_label = claim_annos['o_support_label'];
                     for (let i = 0; i < claim_annos['tiers'].length; i++) {
                         this.tiers.push({
                             rank: i,
                             t_lst: claim_annos['tiers'][i]['t_lst'].map((i) => copy[i]),
-                            send_down: claim_annos['tiers'][i]['send_down'],
-                            selected: claim_annos['tiers'][i]['selected'],
                             description: claim_annos['tiers'][i]['description'],
                         });
                     }
@@ -590,19 +630,102 @@
                 this.setActive(this.tabs[0]);
             },
             save_state() {
-                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => tab.annot);
+                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {return {rel_anno: tab.rel_anno, claim_exp: tab.claim_exp, claim_active:tab.claim_active, claim_anno:tab.claim_anno};});
                 this.parsed_file[this.findex]['claim_annos'] = {};
                 this.parsed_file[this.findex]['claim_annos']['annotated_claim'] = this.selected_claim; 
                 this.parsed_file[this.findex]['claim_annos']['drag_tabs'] = this.drag_tabs.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title));
                 this.parsed_file[this.findex]['claim_annos']['tiers'] = [];
+                this.parsed_file[this.findex]['claim_annos']['sort_by_relevance'] = this.sort_by_relevance;
+                this.parsed_file[this.findex]['claim_annos']['support_colors'] = this.support_colors;
+                this.parsed_file[this.findex]['claim_annos']['o_exp'] = this.o_exp;
+                this.parsed_file[this.findex]['claim_annos']['o_support_label'] = this.o_support_label;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
-                        send_down: this.tiers[i].send_down,
-                        selected: this.tiers[i].selected,
                         description: this.tiers[i].description,
                     });
                 }
+            },
+            update_colors(anno, tab_label){
+                let labels = ["white", "rgba(250, 173, 240, 0.9)", "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
+                this.support_colors[tab_label] = labels[anno];
+            },
+            update_tiers(anno=null, tab=null) {
+                if (anno != null && anno.label === 'Overall' && anno.anno === 3) {
+                    tab.claim_active = true;
+                } else if (anno != null && anno.label === 'Overall') {
+                    tab.claim_active = false;
+                }
+                if (!this.sort_by_relevance) {
+                    return;
+                }
+                let relevant_bucket = [];
+                let sr_bucket = [];
+                let i_good_bucket = [];
+                let ir_bucket = [];
+                for (let i = 0; i < this.tabs.length; i++) {
+                    let get_anno = (i, label) => {
+                        for (let anno of this.tabs[i].rel_anno) {
+                            if (anno.label === label) return anno;
+                        }
+                    };
+                    let anno_val = get_anno(i, "Overall").anno;
+                    if (anno_val == 3) {
+                        relevant_bucket.push(i);
+                    } else if (anno_val == 2) {
+                        sr_bucket.push(i);
+                    } else if (anno_val == 1) {
+                        let pio_vals = ['Population', 'Intervention', 'Outcome'].map((l) => get_anno(i, l).anno);
+                        if (pio_vals.includes(3) || pio_vals.includes(2)) {
+                            i_good_bucket.push(i);
+                        } else {
+                            ir_bucket.push(i);
+                        }
+                    }
+                }
+
+                let copy = JSON.parse(JSON.stringify(this.tabs));
+
+                //this.drag_tabs = copy;
+
+                this.tiers = [];
+                let iterate_tiers = [
+                    {
+                        bucket: relevant_bucket,
+                        label: "All Relevant Abstracts",
+                    },
+                    {
+                        bucket: sr_bucket,
+                        label: "All Somewhat Relevant Abstracts",
+                    },
+                    {
+                        bucket: i_good_bucket,
+                        label: "Irrelevant Abstracts containing at least 1 non-irrelevant PIO element",
+                    },
+                    {
+                        bucket: ir_bucket,
+                        label: "Completely Irrelevant Abstracts",
+                    }
+                ];
+                let used = [];
+                iterate_tiers.forEach((ele) => {
+                    this.tiers.push({
+                        t_lst: ele.bucket.map((i) => copy[i]),
+                        description: ele.label,
+                    });
+                    for (let v of ele.bucket) {
+                        used.push(v);
+                    }
+                });
+
+                //let unused = [];
+                this.drag_tabs = [];
+                for(let i = 0; i < copy.length; i++) {
+                    if (!used.includes(i)) {
+                        this.drag_tabs.push(copy[i]);
+                    }
+                }
+
             },
             setActive(tab) {
                 for (let i = 0; i < this.tabs.length; i++) {
@@ -705,15 +828,16 @@
                     });
                 });
             },
-            toggleTier(tier) {
-                tier.send_down = !tier.send_down;
+            deleteTier(index) {
+                this.tiers[index].t_lst.forEach((ele) => this.drag_tabs.push(ele));
+                this.tiers.splice(index, 1);
             },
             addTier() {
                 this.tiers.push(
                     {
                         rank: this.tiers.length + 1,
-                        t_lst: [],
-                        send_down: false,
+                        t_lst: [], 
+                        description: "",
                     }
                 );
             },
