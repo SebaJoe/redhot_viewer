@@ -67,13 +67,13 @@
                                 </draggable>
                             </div>
                         </div>
-                        <div class="row mt-2" v-for="tier in tiers">
+                        <div class="row mt-2" v-for="(tier, index) in tiers">
                             <div class="col"> 
                                 <div class="card" style="background-color:  #F0F8FF;">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-1 d-flex justify-content-center">
-                                                T{{ tier.rank }}
+                                                T{{ index + 1 }}
                                             </div>
                                             <div class="col border">
                                                 <draggable class="list-group list-group-horizontal" :list="tier.t_lst" group="docs" itemKey="label">
@@ -85,6 +85,9 @@
                                             <div class="col-sm-1 d-flex justify-content-center" @click="toggleTier(tier)">
                                                 <i class="bi bi-chevron-down" v-if="tier.send_down"></i>
                                                 <i class="bi bi-chevron-up" v-else></i>
+                                            </div>
+                                            <div class="col-xs-1">
+                                                <i class="bi bi-three-dots-vertical dot-color"></i>
                                             </div>
                                         </div>
                                         <div class="row mt-3" v-show="tier.send_down">
@@ -157,14 +160,18 @@
                                 <div class="row pb-2">
                                     <div class="col"><strong>Relevance</strong></div>
                                 </div>
-                                <div class="row pb-1" v-for="anno in tab.annot">
-                                    <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
-                                    <div class="col-8">
-                                        <select class="custom-select rev-select" v-model="anno.anno">
-                                            <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
-                                        </select>
+                                <template v-for="(anno, index) in tab.annot">
+                                    <div class="row pb-1" v-if="look_back(index, tab.annot)" :key="index">
+                                        <!-- <div v-if="look_back(index, tab.annot)"> -->
+                                            <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
+                                            <div class="col-8">
+                                                <select class="custom-select rev-select" v-model="anno.anno">
+                                                    <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
+                                                </select>
+                                            </div>
+                                        <!-- </div> -->
                                     </div>
-                                </div>
+                                </template>
                             </div>
                             </div>
                         </div>
@@ -225,6 +232,12 @@
             }
         },
         methods: {
+            look_back(ind, annot) {
+                if (ind == 0) return true;
+                if (!Object.keys(annot[ind]).includes("activate_if")) return true;
+                if (annot[ind - 1].anno === annot[ind].activate_if) return true;
+                return false;
+            },
             readfile() {
                 this.redhot_post = "";
                 this.tabs = [];
@@ -497,7 +510,13 @@
                     "Irrelevant",
                     "Somewhat Relevant",
                     "Relevant",
-                ]
+                ];
+                let support_arr = [
+                    "N/A",
+                    "Refutes",
+                    "Inconclusive",
+                    "Supports",
+                ];
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
                     this.tabs.push({
@@ -526,6 +545,12 @@
                             label: "Overall",
                             anno: (annos_present) ? annos[i].text: 0,
                             cats: relevance_arr,
+                        },
+                        {
+                            label: "Claim Support",
+                            anno: 0,
+                            cats: support_arr,
+                            activate_if: 3,
                         }
                         ]
                     });
@@ -752,7 +777,7 @@
     }
 
     
-    .rev-select option[value="1"] {
+    .rev-select option[value="3"] {
         background: rgb(175, 247, 175, 0.9);
     }
 
@@ -761,10 +786,16 @@
 
     }
 
-    .rev-select option[value="3"] {
+    .rev-select option[value="1"] {
         background: rgba(243, 190, 176, 0.9);
     }
 
+    .dot-color {
+        color: #b7d2e9;
+    }
 
+    .dot-color:hover {
+        color: #626d77;
+    }
 
 </style>
