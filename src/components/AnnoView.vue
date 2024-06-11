@@ -564,7 +564,7 @@
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
                         isActive: false,
-                        claim_exp: (tab_annos !== null) ? tab_annos[i]["doc_exp"]: "",
+                        claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
                             label: "Label",
