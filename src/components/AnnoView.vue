@@ -62,7 +62,7 @@
                             <div class="col">
                                 <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
                                     <template #item="{element}">
-                                        <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @click="stop_sorting()">{{ element.label }}</div>
+                                        <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                     </template>
                                 </draggable>
                             </div>
@@ -80,7 +80,7 @@
                                                     <div class="col border">
                                                         <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
                                                             <template #item="{element}">
-                                                                <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @click="stop_sorting()">{{ element.label }}</div>
+                                                                <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                                             </template>
                                                         </draggable>
                                                     </div>
@@ -237,7 +237,6 @@
                 redhot_post: "",
                 tab_text: "",
                 tabs: [],
-                test_color: "rgb(175, 247, 175, 0.9)",
                 drag_tabs: [],
                 tiers: [
                     {
@@ -342,6 +341,10 @@
                 ];
                 this.claim_selected = false;
                 this.selected_claim = "";
+                this.support_colors = {};
+                this.o_exp = "";
+                this.o_support_label = 0;
+                this.sort_by_relevance = true;
             },
             load_file() {
                 this.set_defaults();
