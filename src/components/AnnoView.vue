@@ -618,7 +618,8 @@
                     console.log(claim_annos);
                     this.drag_tabs = claim_annos['drag_tabs'].map((i) => copy[i]);
                     this.tiers = [];
-                    this.support_colors = claim_annos['support_colors'];
+                    this.support_colors = (Object.keys(claim_annos).includes("support_colors")) ? claim_annos['support_colors']: {};
+                    this.update_all_colors();
                     this.o_exp = claim_annos['o_exp'];
                     this.o_support_label = claim_annos['o_support_label'];
                     for (let i = 0; i < claim_annos['tiers'].length; i++) {
@@ -652,6 +653,11 @@
             update_colors(anno, tab_label){
                 let labels = ["white", "rgba(250, 173, 240, 0.9)", "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
                 this.support_colors[tab_label] = labels[anno];
+            },
+            update_all_colors(){
+                this.tabs.forEach((tab) => {
+                    this.update_colors(tab.claim_anno.anno, tab.label);
+                });
             },
             update_tiers(anno=null, tab=null) {
                 if (anno != null && anno.label === 'Overall' && anno.anno === 3) {
