@@ -157,7 +157,7 @@
                         </ul>
                     </div>
                     <div class="card-body tab-content">
-                        <div v-for="tab in tabs" v-show="tab.isActive">
+                        <div v-for="(tab, index) in tabs" v-show="tab.isActive">
                             <div class="row">
                             <div class="col">
                                 <h5><strong>{{ tab.title }}</strong></h5>
@@ -181,7 +181,7 @@
                                 <div class="row pb-2">
                                     <div class="col"><strong>Relevance</strong></div>
                                 </div>
-                                <div class="row pb-1" v-for="(anno, index) in tab.rel_anno">
+                                <div class="row pb-1" v-for="anno in tab.rel_anno">
                                     <!-- <div v-if="look_back(index, tab.annot)"> -->
                                     <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
                                     <div class="col-8">
@@ -200,6 +200,17 @@
                                         <select class="custom-select rev-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)">
                                             <option v-for="(cat, index) in tab.claim_anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="row pb-1" v-if="tab.claim_active">
+                                    <div class="col" style="padding-top:7px;">Relevant Span:</div>
+                                    <div class="col-2">
+                                        <button v-if="tab.button_mode" class="btn btn-outline-secondary float-right" @click="finalizeRSpan(index)">
+                                            Done
+                                        </button>
+                                        <button v-else class="btn btn-success float-right" @click="highlightRelevantSpan(index)">
+                                            Highlight
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="row pb-1" v-if="tab.claim_active">
@@ -351,11 +362,11 @@
                 this.redhot_post = this.parsed_file[this.findex].text;
                 let end_label = '</span>';
                 const stage_2 = JSON.parse(this.parsed_file[this.findex].stage2_labels)[0]['crowd-entity-annotation']['entities'];
-                let stage_2_tag = '<span class="high highBlue"><div class="hovbox">replace</div>';
+                let stage_2_tag = '<span class="high highBlue " id="index_rep"><div class="hovbox s2tag">replace</div>';
                 console.log(Object.keys(this.parsed_file[this.findex]));
                 if (Object.keys(this.parsed_file[this.findex]).includes("stage1_labels")) {
                     const stage_1 = JSON.parse(this.parsed_file[this.findex].stage1_labels)[0]['crowd-entity-annotation']['entities'];
-                    let stage_1_tag = '<span class="high highYellow" ><div class="hovbox">replace</div>';
+                    let stage_1_tag = '<span class="high highYellow"><div class="hovbox">replace</div>';
                     for (let i = 0; i < stage_1.length; i++) {
                         //wrap span with span
                         let start = stage_1[i].startOffset;
@@ -470,14 +481,17 @@
                     //console.log(stage_1);
                     //console.log(this.redhot_post.slice(start, end));
 
-                    let stage_2_tag_mod = stage_2_tag.replace('replace', label);
+                    let stage_2_tag_mod = stage_2_tag.replace('replace', label).replace("index_rep", "index_" + i);
                     console.log(end_label);
+                    
 
                     this.redhot_post = this.redhot_post.slice(0, start) 
                                         + stage_2_tag_mod 
                                         + this.redhot_post.slice(start, end)
                                         + end_label
                                         + this.redhot_post.slice(end);
+
+                    
                     for (let j = i + 1; j < stage_2.length; j++) {
                         let j_start = stage_2[j].startOffset;
                         let j_end = stage_2[j].endOffset;
@@ -513,6 +527,51 @@
                                     this.claim_selected = true;
                                     sc.style.border = "2px solid #6aa84f";
                                     sc.style['border-radius'] = '5px';
+                                }
+                            });
+                        });
+                        let hovs = this.$refs.postcard.getElementsByClassName('hovbox');
+                        Array.from(hovs).forEach((ele) => {
+                            ele.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                        });
+                        let s2_eles = this.$refs.postcard.getElementsByClassName('s2tag');
+                        Array.from(s2_eles).forEach((ele) => {
+                            ele.addEventListener('dblclick', (e) => {
+                                console.log(ele.innerHTML);
+                                let text = ele.textContent;
+                                if (text !== "") {
+                                    let inp = '<input type="text" class="s2_rep" value="replace_val">';
+                                    inp = inp.replace("replace_val", text);
+                                    ele.innerHTML = inp;
+                                    ele.children[0].addEventListener('keypress', (e2) => {
+                                        if (e2.key === 'Enter') {
+                                            console.log("triggered");
+                                            let val = ele.children[0].value;
+                                            ele.innerHTML = val;
+                                            const match = ele.parentElement.id.match(/index_(\d+)/);
+                                            console.log(match);
+                                            //stage_2[parseInt(match[1])].label = val;
+                                            let s2 = JSON.parse(this.parsed_file[this.findex].stage2_labels);
+                                            s2[0]['crowd-entity-annotation']['entities'][parseInt(match[1])].label = val;
+                                            this.parsed_file[this.findex].stage2_labels = JSON.stringify(s2);
+                                        }
+                                    });    
+                                }
+                            });
+                            ele.addEventListener('mouseleave', (e) => {
+                                console.log("left");
+                                let text = ele.textContent;
+                                if (text === "") {
+                                    let val = ele.children[0].value;
+                                    ele.innerHTML = val;
+                                    const match = ele.parentElement.id.match(/index_(\d+)/);
+                                    console.log(match);
+                                    //stage_2[parseInt(match[1])].label = val;
+                                    let s2 = JSON.parse(this.parsed_file[this.findex].stage2_labels);
+                                    s2[0]['crowd-entity-annotation']['entities'][parseInt(match[1])].label = val;
+                                    this.parsed_file[this.findex].stage2_labels = JSON.stringify(s2);
                                 }
                             });
                         });
@@ -567,6 +626,8 @@
                         doc: docs[i].text,
                         doc_claim: doc_claims[i],
                         isActive: false,
+                        button_mode: false,
+                        rel_span: (tab_annos !== null && Object.keys(tab_annos).includes('rel_span')) ? tab_annos[i]['rel_span'] : [], 
                         claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
@@ -634,7 +695,7 @@
                 this.setActive(this.tabs[0]);
             },
             save_state() {
-                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {return {rel_anno: tab.rel_anno, claim_exp: tab.claim_exp, claim_active:tab.claim_active, claim_anno:tab.claim_anno};});
+                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {return {rel_anno: tab.rel_anno, claim_exp: tab.claim_exp, claim_active:tab.claim_active, claim_anno:tab.claim_anno, rel_span: tab.rel_span};});
                 this.parsed_file[this.findex]['claim_annos'] = {};
                 this.parsed_file[this.findex]['claim_annos']['annotated_claim'] = this.selected_claim; 
                 this.parsed_file[this.findex]['claim_annos']['drag_tabs'] = this.drag_tabs.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title));
@@ -651,13 +712,37 @@
                 }
             },
             update_colors(anno, tab_label){
+                //console.log(anno);
                 let labels = ["white", "rgba(250, 173, 240, 0.9)", "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
                 this.support_colors[tab_label] = labels[anno];
             },
             update_all_colors(){
                 this.tabs.forEach((tab) => {
-                    this.update_colors(tab.claim_anno.anno, tab.label);
+                    if (Object.keys(tab).includes('claim_anno')) {
+                        console.log(tab);
+                        this.update_colors(tab.claim_anno.anno, tab.label);
+                    }
                 });
+            },
+            highlightRelevantSpan(tab_ind) {
+                document.documentElement.style.setProperty("--highlight-color", "#66dadd");
+                this.tabs[tab_ind].button_mode = true;
+                this.printAbs();
+            },
+            finalizeRSpan(tab_ind) {
+                document.documentElement.style.setProperty("--highlight-color", "#c2d7eb");
+                this.tabs[tab_ind].button_mode = false;
+
+                const select = window.getSelection();
+                
+                let ranges = [];
+                for (let i = 0; i < select.rangeCount; i++) {
+                    ranges.push(select.getRangeAt(i).toString());
+                }
+
+                this.tabs[tab_ind].rel_span = ranges;
+
+                this.printAbs();
             },
             update_tiers(anno=null, tab=null) {
                 if (anno != null && anno.label === 'Overall' && anno.anno === 3) {
@@ -765,8 +850,20 @@
                         // h_tag = h_tag.replace("replace", this.tabs[i].doc_claim);
                         // console.log(this.tabs[i].doc_claim);
                         // return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
+                        if (this.tabs[i].button_mode) {
+                            this.tab_text = this.tabs[i].doc;
+                            break;
+                        }
+
                         let all_h = []
-                        all_h.push({span:this.tabs[i].doc_claim, label:"Relevant Span", cname: "highGreen"});
+                        all_h.push({span:this.tabs[i].doc_claim, label:"Punchline", cname: "highGreen"});
+
+                        if (Object.keys(this.tabs[i]).includes('rel_span')) {
+                            this.tabs[i].rel_span.forEach((ele) => {
+                                all_h.push({span:ele, label: "Relevant Span", cname: "highRel"});
+                            });
+                        }   
+
                         //all_h.push({span:this.tabs[i].picor_label.Punchline, label:"Punchline", cname: "highBlue"});
                         let cname_dict = {
                             "Population": "highBlue",
@@ -837,6 +934,9 @@
                     });
                 });
             },
+
+
+
             deleteTier(index) {
                 this.tiers[index].t_lst.forEach((ele) => this.drag_tabs.push(ele));
                 this.tiers.splice(index, 1);
@@ -856,7 +956,7 @@
                 console.log(JSON.parse(JSON.stringify(this.parsed_file)));
                 let end_object = JSON.stringify(this.parsed_file)
                 end_object = end_object.replace(/[\u007F-\uFFFF]/g, function(chr) {
-                                return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+                                return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4);
                             });
                 download(end_object, "redhot_parsed_" + current_date.toString().replace(" ", "_") + ".json", 'application/json');
             }
@@ -869,13 +969,21 @@
     }
 </script>
 
-<style>
+<style lang="scss">
+
+    :root {
+        --highlight-color: #c2d7eb;
+    }
 
     .highYellow {
         background: rgb(243, 243, 162, 0.9);
     }
     .highBlue {
         background: rgb(173, 173, 250, 0.9);
+    }
+
+    .highRel {
+        background: #66dadd;
     }
 
     .highInter {
@@ -894,6 +1002,10 @@
         background: rgb(209, 249, 151, 0.9);
     }
 
+    ::selection {
+        background: var(--highlight-color);
+    }
+
     .hovbox {
         display: none;
     }
@@ -909,7 +1021,11 @@
         filter: brightness(90%) saturate(200%);
     }
 
-    
+    .s2_rep {
+        width: inherit;
+        background-color: inherit;
+    }
+
     .rev-select option[value="3"] {
         background: rgb(175, 247, 175, 0.9);
     }
