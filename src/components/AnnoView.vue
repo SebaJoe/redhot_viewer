@@ -213,11 +213,11 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="row pb-1" v-if="tab.claim_active">
+                                <!--<div class="row pb-1" v-if="tab.claim_active">
                                     <div class="col">
                                         <textarea class="form-control" rows="3" placeholder="Explanation for Support Label" v-model="tab.claim_exp"></textarea>
                                     </div>
-                                </div>
+                                </div>-->
                             </div>
                             </div>
                         </div>
@@ -609,8 +609,8 @@
                 if (Object.keys(this.parsed_file[this.findex]).includes("tab_annos")) {
                     tab_annos = this.parsed_file[this.findex]['tab_annos'];
                 }
-                console.log("MANIAC");
-                console.log(tab_annos[0].rel_span);
+                //console.log("MANIAC");
+                //console.log(tab_annos[0].rel_span);
                 this.tabs = [];
                 this.drag_tabs = [];
                 let relevance_arr = [
@@ -621,7 +621,7 @@
                 ];
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
-                    if (i === 0) console.log(Object.keys(tab_annos).includes('rel_span'));
+                    //if (i === 0) console.log(Object.keys(tab_annos).includes('rel_span'));
                     this.support_colors[docs[i]['label']] = "";
                     this.tabs.push({
                         label: docs[i]["label"],
@@ -631,7 +631,7 @@
                         isActive: false,
                         button_mode: false,
                         rel_span: (tab_annos !== null && Object.keys(tab_annos[i]).includes('rel_span')) ? tab_annos[i]['rel_span'] : [], 
-                        claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
+                        //claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
                             label: "Label",
@@ -698,7 +698,15 @@
                 this.setActive(this.tabs[0]);
             },
             save_state() {
-                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {return {rel_anno: tab.rel_anno, claim_exp: tab.claim_exp, claim_active:tab.claim_active, claim_anno:tab.claim_anno, rel_span: tab.rel_span};});
+                this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {
+                    return {
+                        rel_anno: tab.rel_anno, 
+                        //claim_exp: tab.claim_exp, 
+                        claim_active:tab.claim_active, 
+                        claim_anno:tab.claim_anno, 
+                        rel_span: tab.rel_span
+                    };
+                });
                 this.parsed_file[this.findex]['claim_annos'] = {};
                 this.parsed_file[this.findex]['claim_annos']['annotated_claim'] = this.selected_claim; 
                 this.parsed_file[this.findex]['claim_annos']['drag_tabs'] = this.drag_tabs.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title));
@@ -861,14 +869,14 @@
                         let all_h = []
                         all_h.push({span:this.tabs[i].doc_claim, label:"Punchline", cname: "highGreen"});
 
-                        console.log("THIS IS IT BOYS");
-                        console.log(this.tabs[i]);
+                        //console.log("THIS IS IT BOYS");
+                        //console.log(this.tabs[i]);
                         if (Object.keys(this.tabs[i]).includes('rel_span')) {
-                            console.log(this.tabs[i].rel_span);
+                            //console.log(this.tabs[i].rel_span);
                             this.tabs[i].rel_span.forEach((ele) => {
                                 all_h.push({span: ele, label: "Relevant Span", cname: "highRel"});
                             });
-                            console.log(this.tabs[i].rel_span);
+                            //console.log(this.tabs[i].rel_span);
                         }   
 
 
