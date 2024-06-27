@@ -131,7 +131,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
                                     </div>
-                                    <select class="custom-select rev-select" id="inputGroupSelect01" v-model="o_support_label" >
+                                    <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
                                         <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
                                     </select>
                                 </div>
@@ -197,7 +197,7 @@
                                 <div class="row pb-1" v-if="tab.claim_active">
                                     <div class="col" style="padding-top:7px;">{{ tab.claim_anno.label }}:</div>
                                     <div class="col-8">
-                                        <select class="custom-select rev-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)">
+                                        <select class="custom-select sup-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)">
                                             <option v-for="(cat, index) in tab.claim_anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
                                     </div>
@@ -272,6 +272,7 @@
                 support_labels: [
                     "N/A",
                     "Refutes",
+                    "Conditional Refutes",
                     "Conditional Support",
                     "Supports",
                 ],
@@ -1052,6 +1053,24 @@
     }
 
     .rev-select option[value="1"] {
+        background: rgba(243, 190, 176, 0.9);
+    }
+
+    .sup-select option[value="4"] {
+        background: rgb(175, 247, 175, 0.9);
+    }
+
+    .sup-select option[value="3"] {
+        background: rgb(243, 243, 162, 0.9);
+
+    }
+
+    .sup-select option[value="2"] {
+        background: rgba(223, 204, 118, 0.9);
+
+    }
+
+    .sup-select option[value="1"] {
         background: rgba(243, 190, 176, 0.9);
     }
 
