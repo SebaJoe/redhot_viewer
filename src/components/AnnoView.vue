@@ -725,7 +725,7 @@
             },
             update_colors(anno, tab_label){
                 //console.log(anno);
-                let labels = ["white", "rgba(250, 173, 240, 0.9)", "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
+                let labels = ["white", "rgba(250, 173, 240, 0.9)", " rgba(245, 209, 66, 0.9) " , "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
                 this.support_colors[tab_label] = labels[anno];
             },
             update_all_colors(){
