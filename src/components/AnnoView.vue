@@ -233,6 +233,7 @@
 <script>
     import draggable from "vuedraggable";
     import download from "downloadjs";
+    import axios from 'axios';
     //import { invokeArrayFns } from '@vue/shared';
 //import $ from 'jquery'
 //import { l } from 'vite/dist/node/types.d-aGj9QkWt';
@@ -281,12 +282,14 @@
                 selected_claim: "",
             }
         },
-        mounted: () => {
+        mounted() {
+            console.log("HELLO");
             //console.log(this.$route.query.test);
             let urlParams = new URLSearchParams(window.location.search);
             //console.log(urlParams.has('test'));
             //console.log(urlParams.get('test'));
             if (urlParams.has('load')) {
+                console.log(urlParams.get('load'));
                 this.load_file_from_sample(urlParams.get('load'));
             }
         },
@@ -325,12 +328,15 @@
                 }
             },
             load_file_from_sample(fname) {
-                axios.get(`https://api.github.com/repos/sebajoe/redhot_viewer/contents/samples/{fname}`)
+                console.log(fname);
+                axios.get(`https://api.github.com/repos/sebajoe/redhot_viewer/contents/samples/${fname}`)
                 .then((response) => {
-                    this.parsed_file = JSON.parse(response);
+                    //console.log(atob(response.data.content));
+                    this.parsed_file = JSON.parse(atob(response.data.content));
                     this.findex = 0;
                     this.load_file();
-                });
+                })
+                .catch((response) => {console.log(response);});
             },
             inc_findex() {
                 this.save_state();
