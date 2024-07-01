@@ -16,7 +16,7 @@
                 </button>
             </div>
             <div class="col d-flex justify-content-center">
-                <h4>{{ findex+1 }} / {{ parsed_file.length }}</h4>
+                <h4><input style="width:45px;" :value="findex + 1" @input="move_to_target($event)"> / {{ parsed_file.length }}</h4>
             </div>
             <div class="col">
                 <button class="btn btn-light float-left" @click="inc_findex()">
@@ -281,6 +281,15 @@
                 selected_claim: "",
             }
         },
+        mounted: () => {
+            //console.log(this.$route.query.test);
+            let urlParams = new URLSearchParams(window.location.search);
+            //console.log(urlParams.has('test'));
+            //console.log(urlParams.get('test'));
+            if (urlParams.has('load')) {
+                this.load_file_from_sample(urlParams.get('load'));
+            }
+        },
         methods: {
             look_back(ind, annot, tab) {
                 if (ind == 0) return true;
@@ -315,6 +324,14 @@
                     reader.readAsText(this.file);
                 }
             },
+            load_file_from_sample(fname) {
+                axios.get(`https://api.github.com/repos/sebajoe/redhot_viewer/contents/samples/{fname}`)
+                .then((response) => {
+                    this.parsed_file = JSON.parse(response);
+                    this.findex = 0;
+                    this.load_file();
+                });
+            },
             inc_findex() {
                 this.save_state();
                 if (this.findex < this.parsed_file.length - 1) {
@@ -326,6 +343,28 @@
                 this.save_state();
                 if (this.findex > 0) {
                     this.findex--;
+                    this.load_file();
+                }
+            },
+            move_to_target(event) {
+                let temp_val = event.target.value;
+                //console.log("ENFKDF");
+                //console.log(temp_val);
+                //console.log(typeof temp_val);
+                if (isNaN(parseInt(temp_val))) {
+                    //console.log("The end times are nigh");
+                    return;
+                }
+                this.save_state();
+
+                if (temp_val - 1 >= this.parsed_file.length) {
+                    this.findex = this.parsed_file.length - 1;
+                    this.load_file();
+                } else if (temp_val - 1 < 0) {
+                    this.findex = 0;
+                    this.load_file();
+                } else {
+                    this.findex = temp_val - 1;
                     this.load_file();
                 }
             },
