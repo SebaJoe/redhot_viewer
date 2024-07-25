@@ -213,11 +213,16 @@
                                         </button>
                                     </div>
                                 </div>
-                                <!--<div class="row pb-1" v-if="tab.claim_active">
+
+                                <div class="row pb-2">
+                                    <div class="col"><strong>Optional Comments</strong></div>
+                                </div>
+
+                                <div class="row pb-1">
                                     <div class="col">
-                                        <textarea class="form-control" rows="3" placeholder="Explanation for Support Label" v-model="tab.claim_exp"></textarea>
+                                        <textarea class="form-control" rows="3" placeholder="Comments" v-model="tab.comment"></textarea>
                                     </div>
-                                </div>-->
+                                </div>
                             </div>
                             </div>
                         </div>
@@ -678,6 +683,7 @@
                         button_mode: false,
                         rel_span: (tab_annos !== null && Object.keys(tab_annos[i]).includes('rel_span')) ? tab_annos[i]['rel_span'] : [], 
                         //claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
+                        comment: (tab_annos != null && Object.keys(tab_annos[i]).includes('comment')) ? tab_annos[i]["comment"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
                             label: "Label",
@@ -747,6 +753,7 @@
                 this.parsed_file[this.findex]['tab_annos'] = this.tabs.map((tab) => {
                     return {
                         rel_anno: tab.rel_anno, 
+                        comment: tab.comment,
                         //claim_exp: tab.claim_exp, 
                         claim_active:tab.claim_active, 
                         claim_anno:tab.claim_anno, 
