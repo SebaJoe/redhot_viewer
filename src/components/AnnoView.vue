@@ -161,9 +161,9 @@
                             <div class="row">
                             <div class="col">
                                 <h5><strong>{{ tab.title }}</strong></h5>
-                                <p v-html="tab_text" ref="absts">
-
-                                </p>
+                                <p style="white-space:pre-line;" v-html="tab_text" ref="absts">
+                                        
+                                </p>    
                             </div>
                             <div class="col-4 border-left">
                                 <!-- <h5>Annotations:</h5>
@@ -915,7 +915,7 @@
                         // console.log(this.tabs[i].doc_claim);
                         // return this.tabs[i].doc.replace(this.tabs[i].doc_claim, h_tag);
                         if (this.tabs[i].button_mode) {
-                            this.tab_text = this.tabs[i].doc;
+                            this.tab_text = this.tabs[i].doc.replaceAll("\n\n\n", "TRIPLLE_TOO_DOOUBLE").replaceAll("\n", "\n\n").replaceAll("TRIPLLE_TOO_DOOUBLE", "\n\n");
                             break;
                         }
 
@@ -954,8 +954,10 @@
                             return b.span.length - a.span.length;
                         });
                         var doc_copy = (" " + this.tabs[i].doc).slice(1);
+                        doc_copy = doc_copy.replaceAll("\n\n\n", "TRIPLLE_TOO_DOOUBLE").replaceAll("\n", "\n\n").replaceAll("TRIPLLE_TOO_DOOUBLE", "\n\n");
                         for (let h of all_h) {
-                            doc_copy = this.highlightPICOR(doc_copy, h.span, h.label, h.cname);
+                            let new_span = h.span.replaceAll("\n\n\n", "TRIPLLE_TOO_DOOUBLE").replaceAll("\n", "\n\n").replaceAll("TRIPLLE_TOO_DOOUBLE", "\n\n");
+                            doc_copy = this.highlightPICOR(doc_copy, new_span, h.label, h.cname);
                         }
                         this.tab_text = doc_copy;
                         const interval = setInterval(() => {      
