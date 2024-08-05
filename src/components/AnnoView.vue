@@ -62,7 +62,7 @@
                             <div class="col">
                                 <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
                                     <template #item="{element}">
-                                        <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                        <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                     </template>
                                 </draggable>
                             </div>
@@ -80,7 +80,7 @@
                                                     <div class="col border">
                                                         <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
                                                             <template #item="{element}">
-                                                                <div class="list-group-item" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                                                <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                                             </template>
                                                         </draggable>
                                                     </div>
@@ -127,17 +127,33 @@
                         </div>
                         <div class="row mt-3">
                             <div class="col-4">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                                            </div>
+                                            <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
+                                                <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
-                                        <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
-                                    </select>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
+                                            </div>
+                                            <select class="custom-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" >
+                                                <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col d-flex justify-content-center">
-                                <textarea class="form-control" rows="3" placeholder="Overall Explanation" v-model="o_exp"></textarea>
+                                <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp"></textarea>
                             </div>
                         </div>
                     </div>
@@ -177,6 +193,12 @@
                                 </ul> -->
                                 <div class="row pb-3">
                                     <div class="col"><h5>Annotations:</h5></div>
+                                    <div class="col" v-if="tab.flagged" @click="update_flag(tab)">
+                                        <i class="bi bi-flag-fill float-right text-danger"></i>
+                                    </div>
+                                    <div class="col" v-else @click="update_flag(tab)">
+                                        <i class="bi bi-flag float-right"></i>
+                                    </div>
                                 </div>
                                 <div class="row pb-2">
                                     <div class="col"><strong>Relevance</strong></div>
@@ -274,12 +296,15 @@
                 ],
                 support_colors: {},
                 o_exp: "",
+                basic_table: {},
                 o_support_label: 0,
+                o_ex_support_label: 0,
                 support_labels: [
                     "N/A",
                     "Refutes",
-                    "Conditional Refutes",
-                    "Conditional Support",
+                    "Partially Refutes",
+                    "Inconclusive",
+                    "Partially Supports",
                     "Supports",
                 ],
                 claim_selected: false,
@@ -404,8 +429,10 @@
                 this.claim_selected = false;
                 this.selected_claim = "";
                 this.support_colors = {};
+                this.basic_table = {};
                 this.o_exp = "";
                 this.o_support_label = 0;
+                this.o_ex_support_label = 0;
                 this.sort_by_relevance = true;
             },
             load_file() {
@@ -674,6 +701,7 @@
                     console.log("wft");
                     //if (i === 0) console.log(Object.keys(tab_annos).includes('rel_span'));
                     this.support_colors[docs[i]['label']] = "";
+                    this.basic_table[docs[i]['label']] = i;
                     this.tabs.push({
                         label: docs[i]["label"],
                         title: titles[i],
@@ -685,10 +713,17 @@
                         //claim_exp: (tab_annos !== null) ? tab_annos[i]["claim_exp"]: "",
                         comment: (tab_annos != null && Object.keys(tab_annos[i]).includes('comment')) ? tab_annos[i]["comment"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
+                        flagged: (tab_annos != null && Object.keys(tab_annos[i]).includes('flagged')) ? tab_annos[i]["flagged"]: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
                             label: "Label",
                             anno: 0,
-                            cats: this.support_labels,
+                            cats: [
+                                "N/A",
+                                "Refutes",
+                                "Partially Refutes",
+                                "Partially Supports",
+                                "Supports",
+                            ],
                         },
                         rel_anno: (tab_annos !== null) ? tab_annos[i]["rel_anno"]:[
                         {
@@ -738,6 +773,19 @@
                     this.update_all_colors();
                     this.o_exp = claim_annos['o_exp'];
                     this.o_support_label = claim_annos['o_support_label'];
+                    this.o_ex_support_label = (Object.keys(claim_annos).includes("o_ex_support_label")) ? claim_annos["o_ex_support_label"] : 0;
+                    if (Object.keys(claim_annos).includes('support_labels')) {
+                        this.support_labels = claim_annos['support_labels'];
+                    } else {
+                        //legacy labels
+                        this.support_labels = [
+                            "N/A",
+                            "Refutes",
+                            "Partially Refutes",
+                            "Partially Supports",
+                            "Supports",
+                        ];
+                    }
                     for (let i = 0; i < claim_annos['tiers'].length; i++) {
                         this.tiers.push({
                             rank: i,
@@ -757,7 +805,8 @@
                         //claim_exp: tab.claim_exp, 
                         claim_active:tab.claim_active, 
                         claim_anno:tab.claim_anno, 
-                        rel_span: tab.rel_span
+                        rel_span: tab.rel_span,
+                        flagged: tab.flagged,
                     };
                 });
                 this.parsed_file[this.findex]['claim_annos'] = {};
@@ -768,6 +817,8 @@
                 this.parsed_file[this.findex]['claim_annos']['support_colors'] = this.support_colors;
                 this.parsed_file[this.findex]['claim_annos']['o_exp'] = this.o_exp;
                 this.parsed_file[this.findex]['claim_annos']['o_support_label'] = this.o_support_label;
+                this.parsed_file[this.findex]['claim_annos']['o_ex_support_label'] = this.o_ex_support_label;
+                this.parsed_file[this.findex]['claim_annos']['support_labels'] = this.support_labels;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
@@ -779,6 +830,10 @@
                 //console.log(anno);
                 let labels = ["white", "rgba(250, 173, 240, 0.9)", " rgba(245, 209, 66, 0.9) " , "rgb(243, 243, 162, 0.9)", "rgb(175, 247, 175, 0.9)"];
                 this.support_colors[tab_label] = labels[anno];
+            },
+            update_flag(tab) {
+                tab.flagged = !tab.flagged;
+                this.support_colors[tab.label + "_flag"] = tab.flagged;
             },
             update_all_colors(){
                 this.tabs.forEach((tab) => {
@@ -1110,7 +1165,11 @@
         background: rgba(243, 190, 176, 0.9);
     }
 
-    .sup-select option[value="4"] {
+    .sup-select option[value="5"] {
+        background: rgba(32, 235, 32, 0.9);
+    }
+
+    .sup-select option[value="4"] { 
         background: rgb(175, 247, 175, 0.9);
     }
 
@@ -1126,6 +1185,11 @@
 
     .sup-select option[value="1"] {
         background: rgba(243, 190, 176, 0.9);
+    }
+
+    .flag-style {
+        color:  #D63232;
+        font-weight: bold;
     }
 
     .dot-color {
