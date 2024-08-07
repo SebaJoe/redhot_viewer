@@ -122,7 +122,7 @@
                         </div>
                         <div class="row mt-4">
                             <div class="col">
-                                <h5>Systhesis Annotations:</h5>
+                                <h5>Synthesis Annotations:</h5>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -152,8 +152,19 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col d-flex justify-content-center">
-                                <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp"></textarea>
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col d-flex justify-content-center">
+                                        <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <p>
+                                            Word Count: {{ o_exp_count }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -277,6 +288,7 @@
                 tab_text: "",
                 tabs: [],
                 drag_tabs: [],
+                o_exp_count: 0,
                 tiers: [
                     {
                         rank: 1,
@@ -334,6 +346,36 @@
                     tab.doc_exp_active = false;
                 }
                 return false;
+            },
+            get_count() {
+                console.log(this.o_exp.length);
+                if (this.o_exp.length == 0) {
+                    console.log("HELP");
+                    this.o_exp_count = 0;
+                } else {
+                    this.o_exp_count = this.o_exp.trim().split(" ").length;
+                }
+            },
+            get_count_highlight() {
+                
+                var select_str = "";
+
+                if (document.activeElement) {
+                    var sel_ele = document.activeElement;
+                    select_str = this.o_exp.substring(
+                        sel_ele.selectionStart,
+                        sel_ele.selectionEnd
+                    );
+                } else {
+                    select_str = window.getSelection().toString();
+                }
+                 
+                if (select_str.length > 0 && this.o_exp.includes(select_str)) {
+                    this.o_exp_count = select_str.trim().split(" ").length;
+                } else {
+                    this.get_count();
+                }
+
             },
             stop_sorting() {
                 this.sort_by_relevance = false;
@@ -796,7 +838,7 @@
                         });
                     }
                 }
-
+                this.get_count();
                 this.setActive(this.tabs[0]);
             },
             save_state() {
