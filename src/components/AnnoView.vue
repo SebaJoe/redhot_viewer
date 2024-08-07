@@ -359,10 +359,12 @@
             },
             load_file_from_sample(fname) {
                 console.log(fname);
-                axios.get(`https://api.github.com/repos/sebajoe/redhot_viewer/contents/samples/${fname}`)
+                axios.get(`https://raw.githubusercontent.com/SebaJoe/redhot_viewer/master/samples/${fname}`)
                 .then((response) => {
+                    console.log(response);
+                    this.parsed_file = response.data;                    
                     //console.log(atob(response.data.content));
-                    this.parsed_file = JSON.parse(atob(response.data.content));
+                    //this.parsed_file = JSON.parse(atob(response.data.content));
                     this.findex = 0;
                     this.load_file();
                 })
