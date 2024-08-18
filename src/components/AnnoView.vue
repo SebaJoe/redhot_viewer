@@ -146,7 +146,7 @@
                                                 <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
                                             </div>
                                             <select class="custom-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" >
-                                                <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                                <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -312,7 +312,15 @@
                 o_support_label: 0,
                 o_ex_support_label: 0,
                 support_labels: [
-                    "N/A",
+                    "No Relevant Abstracts",
+                    "Refutes",
+                    "Partially Refutes",
+                    "Inconclusive",
+                    "Partially Supports",
+                    "Supports",
+                ],
+                ex_support_labels: [
+                    "No Expert Opinion",
                     "Refutes",
                     "Partially Refutes",
                     "Inconclusive",
@@ -736,7 +744,7 @@
                 this.tabs = [];
                 this.drag_tabs = [];
                 let relevance_arr = [
-                    "N/A",
+                    "Select",
                     "Irrelevant",
                     "Somewhat Relevant",
                     "Relevant",
@@ -762,7 +770,7 @@
                             label: "Label",
                             anno: 0,
                             cats: [
-                                "N/A",
+                                "Select",
                                 "Refutes",
                                 "Partially Refutes",
                                 "Partially Supports",
@@ -830,6 +838,7 @@
                             "Supports",
                         ];
                     }
+                    if (Object.keys(claim_annos).includes('ex_support_labels')) this.ex_support_labels = claim_annos['ex_support_labels'];
                     for (let i = 0; i < claim_annos['tiers'].length; i++) {
                         this.tiers.push({
                             rank: i,
@@ -863,6 +872,7 @@
                 this.parsed_file[this.findex]['claim_annos']['o_support_label'] = this.o_support_label;
                 this.parsed_file[this.findex]['claim_annos']['o_ex_support_label'] = this.o_ex_support_label;
                 this.parsed_file[this.findex]['claim_annos']['support_labels'] = this.support_labels;
+                this.parsed_file[this.findex]['claim_annos']['ex_support_labels'] = this.ex_support_labels;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
