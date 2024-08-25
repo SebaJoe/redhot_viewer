@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row mt-2">
             <div class="col">
-                <h1>RedHot Annotation Viewer</h1>
+                <h1>RedHOT Annotation Viewer</h1>
             </div>
         </div>
 
@@ -34,7 +34,16 @@
             <div class="col">
                 <div class="card" style="background-color:#ffe4e3;">
                     <div class="card-header text-muted">
-                        RedHot Post
+                        <div class="row">
+                            <div class="col d-flex align-items-center">
+                                RedHOT Post
+                            </div>
+                            <div class="col">
+                                <button class="btn float-right" style="background-color: #92de81; border-radius: 20px;" disabled>
+                                    r/{{ sub_name }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <span style="white-space: pre-line;" v-html="redhot_post" ref="postcard">
@@ -288,6 +297,7 @@
                 tab_text: "",
                 tabs: [],
                 drag_tabs: [],
+                sub_name: "",
                 o_exp_count: 0,
                 tiers: [
                     {
@@ -461,6 +471,7 @@
                 this.tab_text = "";
                 this.tabs = [];
                 this.drag_tabs = [];
+                this.sub_name = "";
                 this.tiers = [
                     {
                         rank: 1,
@@ -489,6 +500,36 @@
             },
             load_file() {
                 this.set_defaults();
+
+                const sub_id_to_population_map = {
+                    "t5_2rtve": "lupus",
+                    "t5_2syer" : "gout",
+                    "t5_2s3g1" : "ibs",
+                    "t5_2tyg2" : "Psychosis",
+                    "t5_395ja" : "costochondritis",
+                    "t5_2saq9" : "POTS",
+                    "t5_2s23e" : "MultipleSclerosis",
+                    "t5_2s1h9" : "Epilepsy",
+                    "t5_2qlaa" : "GERD",
+                    "t5_2r876" : "CysticFibrosis",
+                    "t5_2tqwy" : "rheumatoidarthritis",
+                    "t5_2s453" : "IBD",
+                    "t5_2srfv" : "Dysthymia",
+                    "t5_2r4lw" : "CFS",
+                    "t5_2tmc8" : "bulimia",
+                    "t5_2rhx3" : "narcolepsy",
+                    "t5_2s0tv" : "Hypothyroidism",
+                    "t5_3e8dw" : "thyroidcancer",
+                    "t5_vqneh" : "Sinusitis",
+                    "t5_2rhwk" : "Hyperhidrosis",
+                    "t5_2qnwb" : "ADHD",
+                    "t5_2usbg" : "Gastroparesis",
+                    "t5_2qhsj" : "Diabetes",
+                    "t5_2tnlj" : "ankylosingspondylitis"
+                }
+
+                this.sub_name = sub_id_to_population_map[this.parsed_file[this.findex].subreddit_id];
+
                 this.redhot_post = this.parsed_file[this.findex].text;
                 let end_label = '</span>';
                 const stage_2 = JSON.parse(this.parsed_file[this.findex].stage2_labels)[0]['crowd-entity-annotation']['entities'];
