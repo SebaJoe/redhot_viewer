@@ -39,9 +39,9 @@
                                 RedHOT Post
                             </div>
                             <div class="col">
-                                <button class="btn float-right" style="background-color: #92de81; border-radius: 20px;" disabled>
+                                <div class="float-right" style="background-color: #92de81; border-radius: 20px; padding:0.375rem 0.75rem;">
                                     r/{{ sub_name }}
-                                </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <div class="row mt-3" v-if="claim_selected">
+        <div class="row mt-3">
             <div class="col">
                 <div class="card" style="background-color:#F0F1FF;">
                     <div class="card-header text-muted">
@@ -62,117 +62,202 @@
                     <div class="card-body">
                         <div class="row border-bottom">
                             <div class="col pb-3">
-                                <span style="white-space: pre-line;">
-                                    {{ selected_claim }}
-                                </span>
+                                <div class="row pb-2">
+                                    <div class="col-2">
+                                        <b>
+                                            Original Claim: 
+                                        </b>
+                                    </div>
+                                    <div class="col">
+                                        <span style="white-space: pre-line;">
+                                            {{ selected_claim }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row" v-if="has_rewrite">
+                                    <div class="col-2">
+                                        <b>
+                                            Population: 
+                                        </b>
+                                    </div>
+                                    <div class="col">
+                                        <div class="highBlue" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="pop in pop_list">
+                                            <b>{{ pop }}</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row pt-1" v-if="has_rewrite">
+                                    <div class="col-2">
+                                        <b>
+                                            Intervention: 
+                                        </b>
+                                    </div>
+                                    <div class="col">
+                                        <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="inter in inter_list">
+                                            <b>{{ inter }}</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row pb-3 pt-1" v-if="has_rewrite">
+                                    <div class="col-2">
+                                        <b>
+                                            Outcome: 
+                                        </b>
+                                    </div>
+                                    <div class="col">
+                                        <div class="highOut" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="out in out_list">
+                                            <b>{{ out }}</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row border-top pt-3" v-if="has_rewrite">
+                                    <div class="col-2">
+                                        <b>
+                                            Rewritten Claim: 
+                                        </b>
+                                    </div>
+                                    <div class="col">
+                                        <span style="white-space: pre-line;">
+                                            For 
+                                            <input type="text" v-if="rewritten_claim_dict.pop_edit" v-autowidth :placeholder="rewritten_claim_dict.population" v-model="rewritten_claim_dict.population" v-on:keyup.enter="rewritten_claim_dict.pop_edit = false"> 
+                                            <span class="high highBlue" @dblclick="rewritten_claim_dict.pop_edit = true" v-else>
+                                                <div class="hovbox">
+                                                    Population
+                                                </div>{{rewritten_claim_dict.population}}
+                                            </span>, the intervention,
+                                            <input type="text" v-if="rewritten_claim_dict.inter_edit" v-autowidth :placeholder="rewritten_claim_dict.intervention" v-model="rewritten_claim_dict.intervention" v-on:keyup.enter="rewritten_claim_dict.inter_edit = false"> 
+                                            <span class="high highInter" @dblclick="rewritten_claim_dict.inter_edit = true" v-else>
+                                                <div class="hovbox">
+                                                    Intervention
+                                                </div>{{rewritten_claim_dict.intervention}}
+                                            </span>, had the effect of 
+                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.claimed_result" v-model="rewritten_claim_dict.claimed_result" v-on:keyup.enter="rewritten_claim_dict.res_edit = false"> 
+                                            <span class="high highOut" @dblclick="rewritten_claim_dict.res_edit = true" v-else>
+                                                <div class="hovbox">
+                                                    Claimed Result
+                                                </div>{{rewritten_claim_dict.claimed_result}}
+                                            </span>.
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col">
-                                <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
-                                    <template #item="{element}">
-                                        <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
-                                    </template>
-                                </draggable>
+                        <div v-if="claim_selected">
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
+                                        <template #item="{element}">
+                                            <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                        </template>
+                                    </draggable>
+                                </div>
                             </div>
-                        </div>
-                        <draggable tag="div" :list="tiers" handle=".handle" item-key="tier">
-                            <template #item="{ element, index }">
-                                <div class="row mt-2">
-                                    <div class="col"> 
-                                        <div class="card" style="background-color:  #F0F8FF;">
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-sm-1 d-flex justify-content-center">
-                                                        T{{ index + 1 }}
+                            <draggable tag="div" :list="tiers" handle=".handle" item-key="tier">
+                                <template #item="{ element, index }">
+                                    <div class="row mt-2">
+                                        <div class="col"> 
+                                            <div class="card" style="background-color:  #F0F8FF;">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-sm-1 d-flex justify-content-center">
+                                                            T{{ index + 1 }}
+                                                        </div>
+                                                        <div class="col border">
+                                                            <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
+                                                                <template #item="{element}">
+                                                                    <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                                                </template>
+                                                            </draggable>
+                                                        </div>
+                                                        <div class="col-sm-1 d-flex justify-content-center" @click="deleteTier(index)">
+                                                            <i class="bi bi-trash-fill dot-color"></i>
+                                                        </div>
+                                                        <div class="col-xs-1 handle">
+                                                            <i class="bi bi-three-dots-vertical dot-color"></i>
+                                                        </div>
                                                     </div>
-                                                    <div class="col border">
-                                                        <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
-                                                            <template #item="{element}">
-                                                                <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
-                                                            </template>
-                                                        </draggable>
-                                                    </div>
-                                                    <div class="col-sm-1 d-flex justify-content-center" @click="deleteTier(index)">
-                                                        <i class="bi bi-trash-fill dot-color"></i>
-                                                    </div>
-                                                    <div class="col-xs-1 handle">
-                                                        <i class="bi bi-three-dots-vertical dot-color"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="row mt-3">
-                                                    <div class="col">
-                                                        <div class="input-group input-group-sm">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
+                                                    <div class="row mt-3">
+                                                        <div class="col">
+                                                            <div class="input-group input-group-sm">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
+                                                                </div>
+                                                                <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
                                                             </div>
-                                                            <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                </template>
+                            </draggable>
+                            <div class="row mt-2">
+                                <div class="col d-flex justify-content-center">
+                                    <button class="btn-sm btn-secondary mr-2" @click="addTier()">
+                                        Add Tier
+                                    </button>
+                                    <button class="btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance">
+                                        Stop Sorting
+                                    </button>
+                                    <button class="btn-sm btn-success" @click="toggleSort()" v-else>
+                                        Sort By Relevance
+                                    </button>
                                 </div>
-                            </template>
-                        </draggable>
-                        <div class="row mt-2">
-                            <div class="col d-flex justify-content-center">
-                                <button class="btn-sm btn-secondary mr-2" @click="addTier()">
-                                    Add Tier
-                                </button>
-                                <button class="btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance">
-                                    Stop Sorting
-                                </button>
-                                <button class="btn-sm btn-success" @click="toggleSort()" v-else>
-                                    Sort By Relevance
-                                </button>
                             </div>
-                        </div>
-                        <div class="row mt-4">
-                            <div class="col">
-                                <h5>Synthesis Annotations:</h5>
+                            <div class="row mt-4">
+                                <div class="col">
+                                    <h5>Synthesis Annotations:</h5>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-4">
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                            <div class="row mt-3">
+                                <div class="col-4">
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                                                </div>
+                                                <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
+                                                    <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                                </select>
                                             </div>
-                                            <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
-                                                <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
-                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
+                                                </div>
+                                                <select class="custom-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" >
+                                                    <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mt-3">
-                                    <div class="col">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
-                                            </div>
-                                            <select class="custom-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" >
-                                                <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
-                                            </select>
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col d-flex justify-content-center">
+                                            <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <p>
+                                                Word Count: {{ o_exp_count }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="row">
-                                    <div class="col d-flex justify-content-center">
-                                        <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()"></textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col">
-                                        <p>
-                                            Word Count: {{ o_exp_count }}
-                                        </p>
-                                    </div>
+                        </div>
+                        <div>
+                            <div class="row mt-3">
+                                <div class="col d-flex justify-content-center" @click="toggle_selection()">
+                                    <i class="bi bi-chevron-up" style="font-size:20px;" v-if="claim_selected"></i>
+                                    <i class="bi bi-chevron-down" style="font-size:20px;" v-else></i>
                                 </div>
                             </div>
                         </div>
@@ -196,10 +281,28 @@
                         <div v-for="(tab, index) in tabs" v-show="tab.isActive">
                             <div class="row">
                             <div class="col">
-                                <h5><strong>{{ tab.title }}</strong></h5>
-                                <p style="white-space:pre-line;" v-html="tab_text" ref="absts">
+                                <div class="row pb-2">
+                                    <div class="col">
+                                        <h5><strong>{{ tab.title }}</strong></h5>
+                                    </div>
+                                </div>
+                                <div class="row pb-2">
+                                    <div class="col">
+                                        <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block; margin-right: 10px;">
+                                            {{ tab.picor_label.PubDate }}
+                                        </div>
+                                        <div class="highGreen" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
+                                            {{ tab.picor_label.Source }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <p style="white-space:pre-line;" v-html="tab_text" ref="absts">
                                         
-                                </p>    
+                                        </p>
+                                    </div>
+                                </div>    
                             </div>
                             <div class="col-4 border-left">
                                 <!-- <h5>Annotations:</h5>
@@ -214,10 +317,10 @@
                                 <div class="row pb-3">
                                     <div class="col"><h5>Annotations:</h5></div>
                                     <div class="col" v-if="tab.flagged" @click="update_flag(tab)">
-                                        <i class="bi bi-flag-fill float-right text-danger"></i>
+                                        <i class="bi bi-flag-fill float-right text-danger clickable"></i>
                                     </div>
                                     <div class="col" v-else @click="update_flag(tab)">
-                                        <i class="bi bi-flag float-right"></i>
+                                        <i class="bi bi-flag float-right clickable"></i>
                                     </div>
                                 </div>
                                 <div class="row pb-2">
@@ -299,6 +402,18 @@
                 drag_tabs: [],
                 sub_name: "",
                 o_exp_count: 0,
+                pop_list:[],
+                inter_list:[],
+                out_list:[],
+                has_rewrite: false,
+                rewritten_claim_dict: {
+                    population: "",
+                    intervention: "",
+                    claimed_result: "",
+                    pop_edit: false,
+                    inter_edit: false,
+                    res_edit: false,
+                },
                 tiers: [
                     {
                         rank: 1,
@@ -402,6 +517,9 @@
                 this.sort_by_relevance = !this.sort_by_relevance;
                 if (this.sort_by_relevance) this.update_tiers();
             },
+            toggle_selection(){
+                this.claim_selected = !this.claim_selected;
+            },
             readfile() {
                 this.redhot_post = "";
                 this.tabs = [];
@@ -489,6 +607,15 @@
                         description: "",
                     },
                 ];
+                this.pop_list = [];
+                this.inter_list = [];
+                this.out_list = [];
+                this.rewritten_claim_dict = {
+                    population: "",
+                    intervention: "",
+                    claimed_result: "",
+                };
+                this.has_rewrite = false;
                 this.claim_selected = false;
                 this.selected_claim = "";
                 this.support_colors = {};
@@ -531,6 +658,22 @@
                 this.sub_name = sub_id_to_population_map[this.parsed_file[this.findex].subreddit_id];
 
                 this.redhot_post = this.parsed_file[this.findex].text;
+                this.selected_claim = this.parsed_file[this.findex].claim;
+
+                
+                if (Object.keys(this.parsed_file[this.findex]).includes('intervention')) {
+                    this.has_rewrite = true;
+                }
+
+                if (this.has_rewrite) {
+                    this.inter_list = [this.parsed_file[this.findex].intervention];
+                    this.pop_list = [this.parsed_file[this.findex].population];
+                    this.out_list = [this.parsed_file[this.findex].outcome];
+                    this.rewritten_claim_dict.population = this.pop_list[0];
+                    this.rewritten_claim_dict.intervention = this.inter_list[0];
+                    this.rewritten_claim_dict.claimed_result = this.out_list[0];
+                }
+
                 let end_label = '</span>';
                 const stage_2 = JSON.parse(this.parsed_file[this.findex].stage2_labels)[0]['crowd-entity-annotation']['entities'];
                 let stage_2_tag = '<span class="high highBlue " id="index_rep"><div class="hovbox s2tag">replace</div>';
@@ -680,27 +823,27 @@
                     if (this.$refs.postcard) {        
                         let eles = this.$refs.postcard.getElementsByClassName('high');           
                         this.triggerHoverEvents(eles);
-                        let s_claim = this.$refs.postcard.getElementsByClassName('highdYellow');
-                        Array.from(s_claim).forEach((sc) => {
-                            sc.addEventListener('click', (e) => {
-                                if (e.target.style.border !== "") {
-                                    Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
-                                    this.claim_selected = false;
-                                    //this.selected_claim = "";
-                                } else {
-                                    Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
-                                    console.log(sc.innerHTML);
-                                    let temp = document.createElement('div');
-                                    temp.innerHTML = sc.innerHTML;
-                                    const divs = temp.querySelectorAll('div');
-                                    divs.forEach(div => div.remove());
-                                    this.selected_claim = temp.textContent;
-                                    this.claim_selected = true;
-                                    sc.style.border = "2px solid #6aa84f";
-                                    sc.style['border-radius'] = '5px';
-                                }
-                            });
-                        });
+                        //let s_claim = this.$refs.postcard.getElementsByClassName('highdYellow');
+                        // Array.from(s_claim).forEach((sc) => {
+                        //     sc.addEventListener('click', (e) => {
+                        //         if (e.target.style.border !== "") {
+                        //             Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
+                        //             this.claim_selected = false;
+                        //             //this.selected_claim = "";
+                        //         } else {
+                        //             Array.from(s_claim).forEach((s) => {s.style.border = ""; s.style['border-radius'] = '5px';});
+                        //             console.log(sc.innerHTML);
+                        //             let temp = document.createElement('div');
+                        //             temp.innerHTML = sc.innerHTML;
+                        //             const divs = temp.querySelectorAll('div');
+                        //             divs.forEach(div => div.remove());
+                        //             this.selected_claim = temp.textContent;
+                        //             this.claim_selected = true;
+                        //             sc.style.border = "2px solid #6aa84f";
+                        //             sc.style['border-radius'] = '5px';
+                        //         }
+                        //     });
+                        // });
                         let hovs = this.$refs.postcard.getElementsByClassName('hovbox');
                         Array.from(hovs).forEach((ele) => {
                             ele.addEventListener('click', (e) => {
@@ -807,6 +950,7 @@
                         comment: (tab_annos != null && Object.keys(tab_annos[i]).includes('comment')) ? tab_annos[i]["comment"]: "",
                         claim_active: (tab_annos !== null) ? tab_annos[i]["claim_active"]: false,
                         flagged: (tab_annos != null && Object.keys(tab_annos[i]).includes('flagged')) ? tab_annos[i]["flagged"]: false,
+                        has_add_info: false,
                         claim_anno: (tab_annos !== null) ? tab_annos[i]["claim_anno"]:{
                             label: "Label",
                             anno: 0,
@@ -846,6 +990,9 @@
                 if (picor_labels) {
                     for (let i = 0; i < docs.length; i++) {
                         this.tabs[i]['picor_label'] = picor_labels[i];
+                        if (Object.keys(picor_labels[i]).includes('Source')) {
+                            this.tabs[i].has_add_info = true;
+                        }
                     }
                 }
 
@@ -867,6 +1014,7 @@
                     this.o_exp = claim_annos['o_exp'];
                     this.o_support_label = claim_annos['o_support_label'];
                     this.o_ex_support_label = (Object.keys(claim_annos).includes("o_ex_support_label")) ? claim_annos["o_ex_support_label"] : 0;
+                    this.rewritten_claim_dict = (Object.keys(claim_annos).includes("rewritten_claim")) ? claim_annos['rewritten_claim'] : this.rewritten_claim_dict;
                     if (Object.keys(claim_annos).includes('support_labels')) {
                         this.support_labels = claim_annos['support_labels'];
                     } else {
@@ -914,6 +1062,7 @@
                 this.parsed_file[this.findex]['claim_annos']['o_ex_support_label'] = this.o_ex_support_label;
                 this.parsed_file[this.findex]['claim_annos']['support_labels'] = this.support_labels;
                 this.parsed_file[this.findex]['claim_annos']['ex_support_labels'] = this.ex_support_labels;
+                this.parsed_file[this.findex]['claim_annos']['rewritten_claim'] = this.rewritten_claim_dict;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),

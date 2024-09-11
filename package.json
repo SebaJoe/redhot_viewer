@@ -16,6 +16,7 @@
     "bootstrap-vue": "^2.23.1",
     "downloadjs": "^1.4.7",
     "vue": "^3.4.21",
+    "vue-input-autowidth": "^2.2.1",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
