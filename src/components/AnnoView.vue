@@ -291,9 +291,9 @@
                                         <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block; margin-right: 10px;">
                                             {{ tab.picor_label.PubDate }}
                                         </div>
-                                        <div class="highGreen" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
+                                        <!---<div class="highGreen" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
                                             {{ tab.picor_label.Source }}
-                                        </div>
+                                        </div>-->
                                     </div>
                                 </div>
                                 <div class="row">
@@ -990,7 +990,7 @@
                 if (picor_labels) {
                     for (let i = 0; i < docs.length; i++) {
                         this.tabs[i]['picor_label'] = picor_labels[i];
-                        if (Object.keys(picor_labels[i]).includes('Source')) {
+                        if (Object.keys(picor_labels[i]).includes('PubDate')) {
                             this.tabs[i].has_add_info = true;
                         }
                     }
