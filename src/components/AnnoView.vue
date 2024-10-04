@@ -11,7 +11,7 @@
                 <input class="form-control" type="file" ref="doc" @change="readfile()"/>
             </div>
             <div class="col">
-                <button class="btn btn-light float-right" @click="dec_findex()">
+                <button class="btn btn-light float-right" @click="dec_findex()" :disabled="disable_movement">
                     <i class="bi bi-chevron-left"></i>
                 </button>
             </div>
@@ -19,7 +19,7 @@
                 <h4><input style="width:45px;" :value="findex + 1" @input="move_to_target($event)"> / {{ parsed_file.length }}</h4>
             </div>
             <div class="col">
-                <button class="btn btn-light float-left" @click="inc_findex()">
+                <button class="btn btn-light float-left" @click="inc_findex()" :disabled="disable_movement">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
@@ -38,6 +38,16 @@
                             <div class="col d-flex align-items-center">
                                 RedHOT Post
                             </div>
+                            <div class="col-3 d-flex align-items-center justify-content-center">
+                                <div style="border-radius: 20px; background-color:#faf3f2; padding:0.375rem 0.75rem;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            <i>Not RCT-Verifiable</i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col">
                                 <div class="float-right" style="background-color: #92de81; border-radius: 20px; padding:0.375rem 0.75rem;">
                                     r/{{ sub_name }}
@@ -53,7 +63,24 @@
             </div>
         </div>
 
-        <div class="row mt-3">
+        <div class="row mt-3" v-if="nonverifiable">
+            <div class="col">
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 50 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p>
+                            Word Count: {{ non_ver_just_count }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3" v-if="!nonverifiable">
             <div class="col">
                 <div class="card" style="background-color:#F0F1FF;">
                     <div class="card-header text-muted">
@@ -266,7 +293,7 @@
             </div>
         </div>
 
-        <div class="row mt-3">
+        <div class="row mt-3" v-if="!nonverifiable">
             <div class="col">
                 <div class="card">
                     <div class="card-header">
@@ -402,6 +429,10 @@
                 drag_tabs: [],
                 sub_name: "",
                 o_exp_count: 0,
+                non_ver_just: "",
+                non_ver_just_count: 0,
+                nonverifiable: false,
+                disable_movement: false,
                 pop_list:[],
                 inter_list:[],
                 out_list:[],
@@ -487,6 +518,27 @@
                     this.o_exp_count = 0;
                 } else {
                     this.o_exp_count = this.o_exp.trim().split(" ").length;
+                }
+            },
+            get_count_non_ver_just() {
+                //console.log(this.o_exp.length);
+                if (this.non_ver_just.length == 0) {
+                    console.log("HELP");
+                    this.non_ver_just_count = 0;
+                } else {
+                    this.non_ver_just_count = this.non_ver_just.trim().split(" ").length;
+                    if (this.non_ver_just_count >= 50) {
+                        this.disable_movement = false;
+                    }
+                }
+            },
+            toggle_verifiablity(){
+                this.nonverifiable = !this.nonverifiable;
+                if (this.nonverifiable && this.non_ver_just_count < 50) {
+                    console.log("this happened");
+                    this.disable_movement = true;
+                } else {
+                    this.disable_movement = false;
                 }
             },
             get_count_highlight() {
@@ -590,6 +642,9 @@
                 this.tabs = [];
                 this.drag_tabs = [];
                 this.sub_name = "";
+                this.non_ver_just = "";
+                this.non_ver_just_count = 0;
+                this.nonverifiable = false;
                 this.tiers = [
                     {
                         rank: 1,
@@ -1015,6 +1070,8 @@
                     this.o_support_label = claim_annos['o_support_label'];
                     this.o_ex_support_label = (Object.keys(claim_annos).includes("o_ex_support_label")) ? claim_annos["o_ex_support_label"] : 0;
                     this.rewritten_claim_dict = (Object.keys(claim_annos).includes("rewritten_claim")) ? claim_annos['rewritten_claim'] : this.rewritten_claim_dict;
+                    this.nonverifiable = (Object.keys(claim_annos).includes("nonverifiable")) ? claim_annos['nonverifiable'] : this.nonverifiable;
+                    this.non_ver_just = (Object.keys(claim_annos).includes("nonverifiable")) ? claim_annos['verification_justification'] : this.non_ver_just;
                     if (Object.keys(claim_annos).includes('support_labels')) {
                         this.support_labels = claim_annos['support_labels'];
                     } else {
@@ -1037,6 +1094,7 @@
                     }
                 }
                 this.get_count();
+                this.get_count_non_ver_just();
                 this.setActive(this.tabs[0]);
             },
             save_state() {
@@ -1063,6 +1121,8 @@
                 this.parsed_file[this.findex]['claim_annos']['support_labels'] = this.support_labels;
                 this.parsed_file[this.findex]['claim_annos']['ex_support_labels'] = this.ex_support_labels;
                 this.parsed_file[this.findex]['claim_annos']['rewritten_claim'] = this.rewritten_claim_dict;
+                this.parsed_file[this.findex]['claim_annos']['nonverifiable'] = this.nonverifiable;
+                this.parsed_file[this.findex]['claim_annos']['verification_justification'] = this.non_ver_just;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
