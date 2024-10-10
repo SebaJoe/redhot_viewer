@@ -38,16 +38,6 @@
                             <div class="col d-flex align-items-center">
                                 RedHOT Post
                             </div>
-                            <div class="col-3 d-flex align-items-center justify-content-center">
-                                <div style="border-radius: 20px; background-color:#faf3f2; padding:0.375rem 0.75rem;">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            <i>Not RCT-Verifiable</i>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col">
                                 <div class="float-right" style="background-color: #92de81; border-radius: 20px; padding:0.375rem 0.75rem;">
                                     r/{{ sub_name }}
@@ -63,28 +53,25 @@
             </div>
         </div>
 
-        <div class="row mt-3" v-if="nonverifiable">
-            <div class="col">
-                <div class="row">
-                    <div class="col d-flex justify-content-center">
-                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 50 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <p>
-                            Word Count: {{ non_ver_just_count }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-3" v-if="!nonverifiable">
+        <div class="row mt-3">
             <div class="col">
                 <div class="card" style="background-color:#F0F1FF;">
                     <div class="card-header text-muted">
-                        Selected Claim
+                        <div class="row">
+                            <div class="col d-flex align-items-center">
+                                Selected Claim
+                            </div>
+                            <div class="col float-right">
+                                <div class="float-right" style="border-radius: 20px; background-color:#F0F1FF; padding:0.375rem 0.75rem;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            <i>Not RCT-Verifiable</i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="row border-bottom">
@@ -169,7 +156,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="claim_selected">
+                        <div v-if="claim_selected && !nonverifiable">
                             <div class="row mt-3">
                                 <div class="col">
                                     <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
@@ -283,11 +270,28 @@
                         <div>
                             <div class="row mt-3">
                                 <div class="col d-flex justify-content-center" @click="toggle_selection()">
-                                    <i class="bi bi-chevron-up" style="font-size:20px;" v-if="claim_selected"></i>
+                                    <i class="bi bi-chevron-up" style="font-size:20px;" v-if="claim_selected && !nonverifiable"></i>
                                     <i class="bi bi-chevron-down" style="font-size:20px;" v-else></i>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3" v-if="nonverifiable">
+            <div class="col">
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 50 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p>
+                            Word Count: {{ non_ver_just_count }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -570,7 +574,9 @@
                 if (this.sort_by_relevance) this.update_tiers();
             },
             toggle_selection(){
-                this.claim_selected = !this.claim_selected;
+                if (!this.nonverifiable) {
+                    this.claim_selected = !this.claim_selected;
+                }
             },
             readfile() {
                 this.redhot_post = "";
