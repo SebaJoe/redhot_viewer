@@ -144,7 +144,7 @@
                                                 <div class="hovbox">
                                                     Intervention
                                                 </div>{{rewritten_claim_dict.intervention}}
-                                            </span>, caused  
+                                            </span>, had the outcome of   
                                             <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.claimed_result" v-model="rewritten_claim_dict.claimed_result" v-on:keyup.enter="rewritten_claim_dict.res_edit = false"> 
                                             <span class="high highOut" @dblclick="rewritten_claim_dict.res_edit = true" v-else>
                                                 <div class="hovbox">
