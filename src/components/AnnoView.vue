@@ -124,7 +124,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row border-top pt-3" v-if="has_rewrite">
+                                <!-- <div class="row border-top pt-3" v-if="has_rewrite">
                                     <div class="col-2">
                                         <b>
                                             Rewritten Claim: 
@@ -153,7 +153,7 @@
                                             </span>.
                                         </span>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div v-if="claim_selected && !nonverifiable">
@@ -284,7 +284,7 @@
             <div class="col">
                 <div class="row">
                     <div class="col d-flex justify-content-center">
-                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 20 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
+                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 10 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
                     </div>
                 </div>
                 <div class="row">
@@ -531,14 +531,14 @@
                     this.non_ver_just_count = 0;
                 } else {
                     this.non_ver_just_count = this.non_ver_just.trim().split(" ").length;
-                    if (this.non_ver_just_count >= 20) {
+                    if (this.non_ver_just_count >= 10) {
                         this.disable_movement = false;
                     }
                 }
             },
             toggle_verifiablity(){
                 this.nonverifiable = !this.nonverifiable;
-                if (this.nonverifiable && this.non_ver_just_count < 20) {
+                if (this.nonverifiable && this.non_ver_just_count < 10) {
                     console.log("this happened");
                     this.disable_movement = true;
                 } else {
