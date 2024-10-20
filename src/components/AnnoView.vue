@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row mt-2">
             <div class="col">
-                <h1>RedHOT Annotation Viewer</h1>
+                <h1>RedHOT Annotation Interface</h1>
             </div>
         </div>
 
@@ -11,7 +11,7 @@
                 <input class="form-control" type="file" ref="doc" @change="readfile()"/>
             </div>
             <div class="col">
-                <button class="btn btn-light float-right" @click="dec_findex()" :disabled="disable_movement">
+                <button class="btn btn-light float-right" style="float:right;" @click="dec_findex()" :disabled="disable_movement">
                     <i class="bi bi-chevron-left"></i>
                 </button>
             </div>
@@ -19,12 +19,12 @@
                 <h4><input style="width:45px;" :value="findex + 1" @input="move_to_target($event)"> / {{ parsed_file.length }}</h4>
             </div>
             <div class="col">
-                <button class="btn btn-light float-left" @click="inc_findex()" :disabled="disable_movement">
+                <button class="btn btn-light float-left" style="float:left;" @click="inc_findex()" :disabled="disable_movement">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
             <div class="col-3">
-                <button class="btn btn-outline-secondary float-right" @click="download_parsed_file()">
+                <button class="btn btn-outline-secondary float-right" style="float:right;" @click="download_parsed_file()">
                     Download
                 </button>
             </div>
@@ -39,7 +39,7 @@
                                 RedHOT Post
                             </div>
                             <div class="col">
-                                <div class="float-right" style="background-color: #92de81; border-radius: 20px; padding:0.375rem 0.75rem;">
+                                <div class="float-right" style="background-color: #92de81; border-radius: 20px; padding:0.375rem 0.75rem; display: inline-flex; float:right;">
                                     r/{{ sub_name }}
                                 </div>
                             </div>
@@ -61,10 +61,10 @@
                             <div class="col d-flex align-items-center">
                                 Selected Claim
                             </div>
-                            <div class="col float-right">
-                                <div class="float-right" style="border-radius: 20px; background-color:#F0F1FF; padding:0.375rem 0.75rem;">
+                            <div class="col float-right" style="float:right;">
+                                <div class="float-right" style="border-radius: 20px; background-color:#F0F1FF; padding:0.375rem 0.75rem; display: inline-flex; float:right;">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()" :disabled="verify">
                                         <label class="form-check-label" for="flexCheckDefault">
                                             <i>Not RCT-Verifiable</i>
                                         </label>
@@ -75,7 +75,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row border-bottom">
-                            <div class="col pb-3">
+                            <div class="col pb-3" :class="{ 'col-9': verify }">
                                 <div class="row pb-2">
                                     <div class="col-2">
                                         <b>
@@ -95,8 +95,9 @@
                                         </b>
                                     </div>
                                     <div class="col">
-                                        <div class="highBlue" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="pop in pop_list">
-                                            <b>{{ pop }}</b>
+                                        <div class="highBlue" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
+                                            <input type="text" v-if="rewritten_claim_dict.pop_edit" v-autowidth :placeholder="rewritten_claim_dict.population" v-model="rewritten_claim_dict.population" v-on:keyup.enter="rewritten_claim_dict.pop_edit = false" :disabled="verify"> 
+                                            <b @dblclick="rewritten_claim_dict.pop_edit = true" v-else>{{rewritten_claim_dict.population}}</b>
                                         </div>
                                     </div>
                                 </div>
@@ -107,8 +108,9 @@
                                         </b>
                                     </div>
                                     <div class="col">
-                                        <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="inter in inter_list">
-                                            <b>{{ inter }}</b>
+                                        <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
+                                            <input type="text" v-if="rewritten_claim_dict.inter_edit" v-autowidth :placeholder="rewritten_claim_dict.intervention" v-model="rewritten_claim_dict.intervention" v-on:keyup.enter="rewritten_claim_dict.inter_edit = false" :disabled="verify"> 
+                                            <b @dblclick="rewritten_claim_dict.inter_edit = true" v-else>{{rewritten_claim_dict.intervention}}</b>
                                         </div>
                                     </div>
                                 </div>
@@ -119,8 +121,9 @@
                                         </b>
                                     </div>
                                     <div class="col">
-                                        <div class="highOut" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;" v-for="out in out_list">
-                                            <b>{{ out }}</b>
+                                        <div class="highOut" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
+                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.outcome" v-model="rewritten_claim_dict.outcome" v-on:keyup.enter="rewritten_claim_dict.res_edit = false" :disabled="verify"> 
+                                            <b @dblclick="rewritten_claim_dict.res_edit = true" v-else>{{rewritten_claim_dict.outcome}}</b>
                                         </div>
                                     </div>
                                 </div>
@@ -145,125 +148,184 @@
                                                     Intervention
                                                 </div>{{rewritten_claim_dict.intervention}}
                                             </span>, had the outcome of   
-                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.claimed_result" v-model="rewritten_claim_dict.claimed_result" v-on:keyup.enter="rewritten_claim_dict.res_edit = false"> 
+                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.outcome" v-model="rewritten_claim_dict.outcome" v-on:keyup.enter="rewritten_claim_dict.res_edit = false"> 
                                             <span class="high highOut" @dblclick="rewritten_claim_dict.res_edit = true" v-else>
                                                 <div class="hovbox">
                                                     Claimed Result
-                                                </div>{{rewritten_claim_dict.claimed_result}}
+                                                </div>{{rewritten_claim_dict.outcome}}
                                             </span>.
                                         </span>
                                     </div>
                                 </div> -->
                             </div>
+                            <div class="col pb-3" v-if="verify">
+                                <div class="row mb-3">
+                                    <div class="col d-flex justify-content-center">
+                                        <div class="btn-group" role="group" aria-label="Toggle Buttons">
+
+                                            <input type="radio" class="btn-check" name="options-outlined1" id="success-outlined1" autocomplete="off" v-model="verify_info.claim_verify.label">
+                                            <label class="btn btn-outline-success" for="success-outlined1"><b>Agree</b></label>
+
+                                            <input type="radio" class="btn-check" name="options-outlined1" id="danger-outlined1" autocomplete="off" v-model="verify_info.claim_verify.label">
+                                            <label class="btn btn-outline-danger" for="danger-outlined1"><b>Disagree</b></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.claim_verify.rationale"></textarea>
+                                    </div>
+                                </div> 
+                            </div>
                         </div>
                         <div v-if="claim_selected && !nonverifiable">
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label">
-                                        <template #item="{element}">
-                                            <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
-                                        </template>
-                                    </draggable>
-                                </div>
-                            </div>
-                            <draggable tag="div" :list="tiers" handle=".handle" item-key="tier">
-                                <template #item="{ element, index }">
-                                    <div class="row mt-2">
-                                        <div class="col"> 
-                                            <div class="card" style="background-color:  #F0F8FF;">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-sm-1 d-flex justify-content-center">
-                                                            T{{ index + 1 }}
-                                                        </div>
-                                                        <div class="col border">
-                                                            <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label">
-                                                                <template #item="{element}">
-                                                                    <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
-                                                                </template>
-                                                            </draggable>
-                                                        </div>
-                                                        <div class="col-sm-1 d-flex justify-content-center" @click="deleteTier(index)">
-                                                            <i class="bi bi-trash-fill dot-color"></i>
-                                                        </div>
-                                                        <div class="col-xs-1 handle">
-                                                            <i class="bi bi-three-dots-vertical dot-color"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mt-3">
-                                                        <div class="col">
-                                                            <div class="input-group input-group-sm">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
+                            <div class="row">
+                                <div class="col" :class="{ 'col-9': verify }">
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label" :disabled="verify">
+                                                <template #item="{element}">
+                                                    <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged, 'text-danger':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                                </template>
+                                            </draggable>
+                                        </div>
+                                    </div>
+                                    <draggable tag="div" :list="tiers" handle=".handle" item-key="tier" :disabled="verify">
+                                        <template #item="{ element, index }">
+                                            <div class="row mt-2">
+                                                <div class="col"> 
+                                                    <div class="card" style="background-color:  #F0F8FF;">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-1 d-flex justify-content-center">
+                                                                    T{{ index + 1 }}
                                                                 </div>
-                                                                <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                                                                <div class="col border">
+                                                                    <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label" :disabled="verify">
+                                                                        <template #item="{element}">
+                                                                            <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
+                                                                        </template>
+                                                                    </draggable>
+                                                                </div>
+                                                                <div class="col-1 d-flex justify-content-center" @click="deleteTier(index)">
+                                                                    <i class="bi bi-trash-fill dot-color"></i>
+                                                                </div>
+                                                                <div class="col-1 handle justify-content-center">
+                                                                    <i class="bi bi-three-dots-vertical dot-color"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-3">
+                                                                <div class="col">
+                                                                    <div class="input-group input-group-sm">
+                                                                        <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
+                                                                        <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm":disabled="verify">
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </template>
+                                    </draggable>
+                                    <div class="row mt-2">
+                                        <div class="col d-flex justify-content-center">
+                                            <button class="btn btn-sm btn-secondary me-2" @click="addTier()" :disabled="verify">
+                                                Add Tier
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance" :disabled="verify">
+                                                Stop Sorting
+                                            </button>
+                                            <button class="btn btn-sm btn-success" @click="toggleSort()" v-else :disabled="verify">
+                                                Sort By Relevance
+                                            </button>
                                         </div>
                                     </div>
-                                </template>
-                            </draggable>
-                            <div class="row mt-2">
-                                <div class="col d-flex justify-content-center">
-                                    <button class="btn-sm btn-secondary mr-2" @click="addTier()">
-                                        Add Tier
-                                    </button>
-                                    <button class="btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance">
-                                        Stop Sorting
-                                    </button>
-                                    <button class="btn-sm btn-success" @click="toggleSort()" v-else>
-                                        Sort By Relevance
-                                    </button>
                                 </div>
-                            </div>
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <h5>Synthesis Annotations:</h5>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-4">
+                                <div class="col pt-4" v-if="verify">
+                                    <div class="row mb-3">
+                                        <div class="col d-flex justify-content-center">
+                                            <div class="btn-group" role="group" aria-label="Toggle Buttons">
+
+                                                <input type="radio" class="btn-check" name="options-outlined2" id="success-outlined2" autocomplete="off" v-model="verify_info.tier_verify.label">
+                                                <label class="btn btn-outline-success" for="success-outlined2"><b>Agree</b></label>
+
+                                                <input type="radio" class="btn-check" name="options-outlined2" id="danger-outlined2" autocomplete="off" v-model="verify_info.tier_verify.label">
+                                                <label class="btn btn-outline-danger" for="danger-outlined2"><b>Disagree</b></label>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
-                                                </div>
-                                                <select class="custom-select sup-select" id="inputGroupSelect01" v-model="o_support_label" >
-                                                    <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
-                                                </select>
-                                            </div>
+                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.tier_verify.rationale"></textarea>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col" :class="{ 'col-9': verify }">
+                                    <div class="row mt-4">
+                                        <div class="col">
+                                            <h5>Synthesis Annotations:</h5>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
+                                        <div class="col-4">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="input-group">
+                                                        <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
+                                                        <select class="form-select sup-select" id="inputGroupSelect01" v-model="o_support_label" :disabled="verify">
+                                                            <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <select class="custom-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" >
-                                                    <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
-                                                </select>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col">
+                                                    <div class="input-group">
+                                                        <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
+                                                        <select class="form-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" :disabled="verify">
+                                                            <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col d-flex justify-content-center">
+                                                    <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()" :disabled="verify"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p>
+                                                        Word Count: {{ o_exp_count }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <div class="row">
+                                <div class="col pt-3" v-if="verify">
+                                    <div class="row mb-3">
                                         <div class="col d-flex justify-content-center">
-                                            <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()"></textarea>
+                                            <div class="btn-group" role="group" aria-label="Toggle Buttons">
+
+                                                <input type="radio" class="btn-check" name="options-outlined3" id="success-outlined3" autocomplete="off" v-model="verify_info.synthesis_verify.label">
+                                                <label class="btn btn-outline-success" for="success-outlined3"><b>Agree</b></label>
+
+                                                <input type="radio" class="btn-check" name="options-outlined3" id="danger-outlined3" autocomplete="off" v-model="verify_info.synthesis_verify.label">
+                                                <label class="btn btn-outline-danger" for="danger-outlined3"><b>Disagree</b></label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <p>
-                                                Word Count: {{ o_exp_count }}
-                                            </p>
+                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.synthesis_verify.rationale"></textarea>
                                         </div>
-                                    </div>
+                                    </div> 
                                 </div>
                             </div>
                         </div>
@@ -284,7 +346,7 @@
             <div class="col">
                 <div class="row">
                     <div class="col d-flex justify-content-center">
-                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 10 words" v-model="non_ver_just" @input="get_count_non_ver_just()"></textarea>
+                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 10 words" v-model="non_ver_just" @input="get_count_non_ver_just()" :disabled="verify"></textarea>
                     </div>
                 </div>
                 <div class="row">
@@ -348,10 +410,10 @@
                                 <div class="row pb-3">
                                     <div class="col"><h5>Annotations:</h5></div>
                                     <div class="col" v-if="tab.flagged" @click="update_flag(tab)">
-                                        <i class="bi bi-flag-fill float-right text-danger clickable"></i>
+                                        <i class="bi bi-flag-fill float-right text-danger clickable" style="float:right;"></i>
                                     </div>
                                     <div class="col" v-else @click="update_flag(tab)">
-                                        <i class="bi bi-flag float-right clickable"></i>
+                                        <i class="bi bi-flag float-right clickable" style="float:right;"></i>
                                     </div>
                                 </div>
                                 <div class="row pb-2">
@@ -361,7 +423,7 @@
                                     <!-- <div v-if="look_back(index, tab.annot)"> -->
                                     <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
                                     <div class="col-8">
-                                        <select class="custom-select rev-select" v-model="anno.anno" @change="update_tiers(anno, tab)">
+                                        <select class="form-select rev-select" v-model="anno.anno" @change="update_tiers(anno, tab)" :disabled="verify">
                                             <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
                                     </div>
@@ -373,7 +435,7 @@
                                 <div class="row pb-1" v-if="tab.claim_active">
                                     <div class="col" style="padding-top:7px;">{{ tab.claim_anno.label }}:</div>
                                     <div class="col-8">
-                                        <select class="custom-select sup-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)">
+                                        <select class="form-select sup-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)" :disabled="verify">
                                             <option v-for="(cat, index) in tab.claim_anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
                                     </div>
@@ -381,10 +443,10 @@
                                 <div class="row pb-1" v-if="tab.claim_active">
                                     <div class="col" style="padding-top:7px;">Relevant Span:</div>
                                     <div class="col-2">
-                                        <button v-if="tab.button_mode" class="btn btn-outline-secondary float-right" @click="finalizeRSpan(index)">
+                                        <button v-if="tab.button_mode" class="btn btn-outline-secondary float-right" style="float:right;" @click="finalizeRSpan(index)">
                                             Done
                                         </button>
-                                        <button v-else class="btn btn-success float-right" @click="highlightRelevantSpan(index)">
+                                        <button v-else class="btn btn-success float-right" style="float:right;" @click="highlightRelevantSpan(index)">
                                             Highlight
                                         </button>
                                     </div>
@@ -396,7 +458,34 @@
 
                                 <div class="row pb-1">
                                     <div class="col">
-                                        <textarea class="form-control" rows="3" placeholder="Comments" v-model="tab.comment"></textarea>
+                                        <textarea class="form-control" rows="3" placeholder="Comments" v-model="tab.comment" :disabled="verify"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="row pb-2">
+                                        <div class="col"><strong>Verification</strong></div>
+                                    </div>
+
+                                    <div class="col pt-3" v-if="verify">
+                                        <div class="row mb-3">
+                                            <div class="col d-flex justify-content-center">
+                                                <div class="btn-group" role="group" aria-label="Toggle Buttons">
+
+                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'success-outlined-ind' + index" autocomplete="off" v-model="verify_info.tab_verify[index].label">
+                                                    <label class="btn btn-outline-success" :for="'success-outlined-ind' + index"><b>Agree</b></label>
+
+                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'danger-outlined-ind' + index" autocomplete="off" v-model="verify_info.tab_verify[index].label">
+                                                    <label class="btn btn-outline-danger" :for="'danger-outlined-ind' + index"><b>Disagree</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.tab_verify[index].rationale"></textarea>
+                                            </div>
+                                        </div> 
                                     </div>
                                 </div>
                             </div>
@@ -431,8 +520,24 @@
                 tab_text: "",
                 tabs: [],
                 drag_tabs: [],
+                verify_info: {
+                    claim_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    tier_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    synthesis_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    tab_verify: [],
+                },
                 sub_name: "",
                 o_exp_count: 0,
+                verify: false,
                 non_ver_just: "",
                 non_ver_just_count: 0,
                 nonverifiable: false,
@@ -444,7 +549,7 @@
                 rewritten_claim_dict: {
                     population: "",
                     intervention: "",
-                    claimed_result: "",
+                    outcome: "",
                     pop_edit: false,
                     inter_edit: false,
                     res_edit: false,
@@ -502,8 +607,16 @@
                 console.log(urlParams.get('load'));
                 this.load_file_from_sample(urlParams.get('load'));
             }
+
+            if (urlParams.has('verify')) {
+                this.verify_mode();
+            }
+
         },
         methods: {
+            verify_mode(){
+                this.verify = true;
+            },
             look_back(ind, annot, tab) {
                 if (ind == 0) return true;
                 if (!Object.keys(annot[ind]).includes("activate_if")) return true;
@@ -651,6 +764,21 @@
                 this.non_ver_just = "";
                 this.non_ver_just_count = 0;
                 this.nonverifiable = false;
+                this.verify_info = {
+                    claim_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    tier_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    synthesis_verify: {
+                        label: "",
+                        rationale: "",
+                    },
+                    tab_verify: [],
+                };
                 this.tiers = [
                     {
                         rank: 1,
@@ -674,7 +802,7 @@
                 this.rewritten_claim_dict = {
                     population: "",
                     intervention: "",
-                    claimed_result: "",
+                    outcome: "",
                 };
                 this.has_rewrite = false;
                 this.claim_selected = false;
@@ -728,11 +856,12 @@
 
                 if (this.has_rewrite) {
                     this.inter_list = [this.parsed_file[this.findex].intervention];
+
                     this.pop_list = [this.parsed_file[this.findex].population];
                     this.out_list = [this.parsed_file[this.findex].outcome];
                     this.rewritten_claim_dict.population = this.pop_list[0];
                     this.rewritten_claim_dict.intervention = this.inter_list[0];
-                    this.rewritten_claim_dict.claimed_result = this.out_list[0];
+                    this.rewritten_claim_dict.outcome = this.out_list[0];
                 }
 
                 let end_label = '</span>';
@@ -997,6 +1126,10 @@
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
                     //if (i === 0) console.log(Object.keys(tab_annos).includes('rel_span'));
+                    this.verify_info.tab_verify.push({
+                        label: "",
+                        rationale: "",
+                    });
                     this.support_colors[docs[i]['label']] = "";
                     this.basic_table[docs[i]['label']] = i;
                     this.tabs.push({
@@ -1061,7 +1194,9 @@
 
                 this.drag_tabs = copy;
 
-
+                if (Object.keys(this.parsed_file[this.findex]).includes("annotator_verification")) {
+                    this.verify_info = this.parsed_file[this.findex]['annotator_verification'];
+                }
 
                 if (Object.keys(this.parsed_file[this.findex]).includes("claim_annos")) {
                     let claim_annos = this.parsed_file[this.findex]['claim_annos'];
@@ -1129,6 +1264,7 @@
                 this.parsed_file[this.findex]['claim_annos']['rewritten_claim'] = this.rewritten_claim_dict;
                 this.parsed_file[this.findex]['claim_annos']['nonverifiable'] = this.nonverifiable;
                 this.parsed_file[this.findex]['claim_annos']['verification_justification'] = this.non_ver_just;
+                this.parsed_file[this.findex]['annotator_verification'] = this.verify_info;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
@@ -1142,6 +1278,9 @@
                 this.support_colors[tab_label] = labels[anno];
             },
             update_flag(tab) {
+                if (this.verify) {
+                    return;
+                }
                 tab.flagged = !tab.flagged;
                 this.support_colors[tab.label + "_flag"] = tab.flagged;
             },
@@ -1374,6 +1513,9 @@
 
 
             deleteTier(index) {
+                if (this.verify) {
+                    return;
+                }
                 this.tiers[index].t_lst.forEach((ele) => this.drag_tabs.push(ele));
                 this.tiers.splice(index, 1);
             },
@@ -1498,7 +1640,6 @@
     }
 
     .flag-style {
-        color:  #D63232;
         font-weight: bold;
     }
 
