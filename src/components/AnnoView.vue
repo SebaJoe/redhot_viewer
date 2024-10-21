@@ -2,7 +2,18 @@
     <div class="container">
         <div class="row mt-2">
             <div class="col">
-                <h1>RedHOT Annotation Interface</h1>
+                <h1>RedHOT Annotation Interface <span v-if="validate">(Validation Mode)</span></h1>
+            </div>
+        </div>
+        <div class="row mt-2" v-if="validate">
+            <div class="col">
+                This is validation mode. Answer whether you agree or disagree to all of the questions. If you disagree, you <strong>MUST</strong> provide a rationale as to why you disagree.
+                You may also use the rationale textbox to make comments as well.
+            </div>
+        </div>
+        <div class="row mt-2" v-else>
+            <div class="col">
+                This interface is for verifying medical claims made on Reddit posts using retrieved evidence. Complete all annotation according to these <a href="https://docs.google.com/presentation/d/1hz-jw6UKyi0cDkzWuJoKoLTYP4ejuqwR-WPpuZMTg7o/edit?usp=sharing">instructions.</a>
             </div>
         </div>
 
@@ -64,7 +75,7 @@
                             <div class="col float-right" style="float:right;">
                                 <div class="float-right" style="border-radius: 20px; background-color:#F0F1FF; padding:0.375rem 0.75rem; display: inline-flex; float:right;">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()" :disabled="verify">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="nonverifiable" @click="toggle_verifiablity()" :disabled="validate">
                                         <label class="form-check-label" for="flexCheckDefault">
                                             <i>Not RCT-Verifiable</i>
                                         </label>
@@ -75,7 +86,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row border-bottom">
-                            <div class="col pb-3" :class="{ 'col-9': verify }">
+                            <div class="col pb-3" :class="{ 'col-9': validate }">
                                 <div class="row pb-2">
                                     <div class="col-2">
                                         <b>
@@ -96,7 +107,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="highBlue" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
-                                            <input type="text" v-if="rewritten_claim_dict.pop_edit" v-autowidth :placeholder="rewritten_claim_dict.population" v-model="rewritten_claim_dict.population" v-on:keyup.enter="rewritten_claim_dict.pop_edit = false" :disabled="verify"> 
+                                            <input type="text" v-if="rewritten_claim_dict.pop_edit" v-autowidth :placeholder="rewritten_claim_dict.population" v-model="rewritten_claim_dict.population" v-on:keyup.enter="rewritten_claim_dict.pop_edit = false" :disabled="validate"> 
                                             <b @dblclick="rewritten_claim_dict.pop_edit = true" v-else>{{rewritten_claim_dict.population}}</b>
                                         </div>
                                     </div>
@@ -109,7 +120,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="highInter" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
-                                            <input type="text" v-if="rewritten_claim_dict.inter_edit" v-autowidth :placeholder="rewritten_claim_dict.intervention" v-model="rewritten_claim_dict.intervention" v-on:keyup.enter="rewritten_claim_dict.inter_edit = false" :disabled="verify"> 
+                                            <input type="text" v-if="rewritten_claim_dict.inter_edit" v-autowidth :placeholder="rewritten_claim_dict.intervention" v-model="rewritten_claim_dict.intervention" v-on:keyup.enter="rewritten_claim_dict.inter_edit = false" :disabled="validate"> 
                                             <b @dblclick="rewritten_claim_dict.inter_edit = true" v-else>{{rewritten_claim_dict.intervention}}</b>
                                         </div>
                                     </div>
@@ -122,7 +133,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="highOut" style="border-radius: 20px; padding:0.375rem 0.75rem; display:inline-block;">
-                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.outcome" v-model="rewritten_claim_dict.outcome" v-on:keyup.enter="rewritten_claim_dict.res_edit = false" :disabled="verify"> 
+                                            <input type="text" v-if="rewritten_claim_dict.res_edit" v-autowidth :placeholder="rewritten_claim_dict.outcome" v-model="rewritten_claim_dict.outcome" v-on:keyup.enter="rewritten_claim_dict.res_edit = false" :disabled="validate"> 
                                             <b @dblclick="rewritten_claim_dict.res_edit = true" v-else>{{rewritten_claim_dict.outcome}}</b>
                                         </div>
                                     </div>
@@ -158,39 +169,42 @@
                                     </div>
                                 </div> -->
                             </div>
-                            <div class="col pb-3" v-if="verify">
+                            <div class="col pb-3" v-if="validate">
+                                <div class="row pb-2">
+                                        <div class="col"><strong>Is the annotator's position on this claim's verifiability acceptable?</strong></div>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col d-flex justify-content-center">
                                         <div class="btn-group" role="group" aria-label="Toggle Buttons">
 
-                                            <input type="radio" class="btn-check" name="options-outlined1" id="success-outlined1" autocomplete="off" v-model="verify_info.claim_verify.label">
+                                            <input type="radio" class="btn-check" name="options-outlined1" id="success-outlined1" autocomplete="off" v-model="validate_info.claim_validate.label">
                                             <label class="btn btn-outline-success" for="success-outlined1"><b>Agree</b></label>
 
-                                            <input type="radio" class="btn-check" name="options-outlined1" id="danger-outlined1" autocomplete="off" v-model="verify_info.claim_verify.label">
+                                            <input type="radio" class="btn-check" name="options-outlined1" id="danger-outlined1" autocomplete="off" v-model="validate_info.claim_validate.label">
                                             <label class="btn btn-outline-danger" for="danger-outlined1"><b>Disagree</b></label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col">
-                                        <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.claim_verify.rationale"></textarea>
+                                        <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="validate_info.claim_validate.rationale"></textarea>
                                     </div>
                                 </div> 
                             </div>
                         </div>
-                        <div v-if="claim_selected && !nonverifiable">
+                        <div v-if="(override || claim_selected) && !nonverifiable">
                             <div class="row">
-                                <div class="col" :class="{ 'col-9': verify }">
+                                <div class="col" :class="{ 'col-9': validate }">
                                     <div class="row mt-3">
                                         <div class="col">
-                                            <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label" :disabled="verify">
+                                            <draggable class="list-group list-group-horizontal" :list="drag_tabs" group="docs" itemKey="label" :disabled="validate">
                                                 <template #item="{element}">
                                                     <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged, 'text-danger':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label]}" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                                 </template>
                                             </draggable>
                                         </div>
                                     </div>
-                                    <draggable tag="div" :list="tiers" handle=".handle" item-key="tier" :disabled="verify">
+                                    <draggable tag="div" :list="tiers" handle=".handle" item-key="tier" :disabled="validate">
                                         <template #item="{ element, index }">
                                             <div class="row mt-2">
                                                 <div class="col"> 
@@ -201,7 +215,7 @@
                                                                     T{{ index + 1 }}
                                                                 </div>
                                                                 <div class="col border">
-                                                                    <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label" :disabled="verify">
+                                                                    <draggable class="list-group list-group-horizontal" :list="element.t_lst" group="docs" itemKey="label" :disabled="validate">
                                                                         <template #item="{element}">
                                                                             <div class="list-group-item" :class="{ 'flag-style':tabs[basic_table[element.label]].flagged }" v-bind:style="{ backgroundColor: support_colors[element.label] }" v-on:dblclick="setActive_w_label(element.label)" @mousedown="stop_sorting()">{{ element.label }}</div>
                                                                         </template>
@@ -218,7 +232,7 @@
                                                                 <div class="col">
                                                                     <div class="input-group input-group-sm">
                                                                         <span class="input-group-text" id="inputGroup-sizing-sm">Label</span>
-                                                                        <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm":disabled="verify">
+                                                                        <input type="text" class="form-control" v-model="element.description" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm":disabled="validate">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -230,40 +244,43 @@
                                     </draggable>
                                     <div class="row mt-2">
                                         <div class="col d-flex justify-content-center">
-                                            <button class="btn btn-sm btn-secondary me-2" @click="addTier()" :disabled="verify">
+                                            <button class="btn btn-sm btn-secondary me-2" @click="addTier()" :disabled="validate">
                                                 Add Tier
                                             </button>
-                                            <button class="btn btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance" :disabled="verify">
+                                            <button class="btn btn-sm btn-danger" @click="toggleSort()" v-if="sort_by_relevance" :disabled="validate">
                                                 Stop Sorting
                                             </button>
-                                            <button class="btn btn-sm btn-success" @click="toggleSort()" v-else :disabled="verify">
+                                            <button class="btn btn-sm btn-success" @click="toggleSort()" v-else :disabled="validate">
                                                 Sort By Relevance
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col pt-4" v-if="verify">
+                                <div class="col pt-4" v-if="validate">
                                     <div class="row mb-3">
+                                        <div class="row pb-2">
+                                            <div class="col"><strong>Is this is an acceptable way to tier these abstracts?</strong></div>
+                                        </div>
                                         <div class="col d-flex justify-content-center">
                                             <div class="btn-group" role="group" aria-label="Toggle Buttons">
 
-                                                <input type="radio" class="btn-check" name="options-outlined2" id="success-outlined2" autocomplete="off" v-model="verify_info.tier_verify.label">
+                                                <input type="radio" class="btn-check" name="options-outlined2" id="success-outlined2" autocomplete="off" v-model="validate_info.tier_validate.label">
                                                 <label class="btn btn-outline-success" for="success-outlined2"><b>Agree</b></label>
 
-                                                <input type="radio" class="btn-check" name="options-outlined2" id="danger-outlined2" autocomplete="off" v-model="verify_info.tier_verify.label">
+                                                <input type="radio" class="btn-check" name="options-outlined2" id="danger-outlined2" autocomplete="off" v-model="validate_info.tier_validate.label">
                                                 <label class="btn btn-outline-danger" for="danger-outlined2"><b>Disagree</b></label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.tier_verify.rationale"></textarea>
+                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="validate_info.tier_validate.rationale"></textarea>
                                         </div>
                                     </div> 
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col" :class="{ 'col-9': verify }">
+                                <div class="col" :class="{ 'col-9': validate }">
                                     <div class="row mt-4">
                                         <div class="col">
                                             <h5>Synthesis Annotations:</h5>
@@ -275,7 +292,7 @@
                                                 <div class="col">
                                                     <div class="input-group">
                                                         <label class="input-group-text" for="inputGroupSelect01">Overall Support</label>
-                                                        <select class="form-select sup-select" id="inputGroupSelect01" v-model="o_support_label" :disabled="verify">
+                                                        <select class="form-select sup-select" id="inputGroupSelect01" v-model="o_support_label" :disabled="validate">
                                                             <option v-for="(cat, index) in support_labels" v-bind:value="index">{{ cat }}</option>
                                                         </select>
                                                     </div>
@@ -285,7 +302,7 @@
                                                 <div class="col">
                                                     <div class="input-group">
                                                         <label class="input-group-text" for="inputGroupSelect02">Expert Opinion</label>
-                                                        <select class="form-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" :disabled="verify">
+                                                        <select class="form-select sup-select" id="inputGroupSelect02" v-model="o_ex_support_label" :disabled="validate">
                                                             <option v-for="(cat, index) in ex_support_labels" v-bind:value="index">{{ cat }}</option>
                                                         </select>
                                                     </div>
@@ -295,7 +312,7 @@
                                         <div class="col">
                                             <div class="row">
                                                 <div class="col d-flex justify-content-center">
-                                                    <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()" :disabled="verify"></textarea>
+                                                    <textarea class="form-control" rows="10" placeholder="Overall Explanation" v-model="o_exp" @input="get_count()" @mouseup="get_count_highlight()" :disabled="validate"></textarea>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -308,22 +325,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col pt-3" v-if="verify">
+                                <div class="col pt-3" v-if="validate">
+                                    <div class="row pb-2">
+                                        <div class="col"><strong>Are these synthesis annotations and explanation acceptable?</strong></div>
+                                    </div>
                                     <div class="row mb-3">
                                         <div class="col d-flex justify-content-center">
                                             <div class="btn-group" role="group" aria-label="Toggle Buttons">
 
-                                                <input type="radio" class="btn-check" name="options-outlined3" id="success-outlined3" autocomplete="off" v-model="verify_info.synthesis_verify.label">
+                                                <input type="radio" class="btn-check" name="options-outlined3" id="success-outlined3" autocomplete="off" v-model="validate_info.synthesis_validate.label">
                                                 <label class="btn btn-outline-success" for="success-outlined3"><b>Agree</b></label>
 
-                                                <input type="radio" class="btn-check" name="options-outlined3" id="danger-outlined3" autocomplete="off" v-model="verify_info.synthesis_verify.label">
+                                                <input type="radio" class="btn-check" name="options-outlined3" id="danger-outlined3" autocomplete="off" v-model="validate_info.synthesis_validate.label">
                                                 <label class="btn btn-outline-danger" for="danger-outlined3"><b>Disagree</b></label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.synthesis_verify.rationale"></textarea>
+                                            <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="validate_info.synthesis_validate.rationale"></textarea>
                                         </div>
                                     </div> 
                                 </div>
@@ -346,7 +366,7 @@
             <div class="col">
                 <div class="row">
                     <div class="col d-flex justify-content-center">
-                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 10 words" v-model="non_ver_just" @input="get_count_non_ver_just()" :disabled="verify"></textarea>
+                        <textarea class="form-control" rows="10" placeholder="Justify why this claim is non-RCT verifiable in 10 words" v-model="non_ver_just" @input="get_count_non_ver_just()" :disabled="validate"></textarea>
                     </div>
                 </div>
                 <div class="row">
@@ -423,7 +443,7 @@
                                     <!-- <div v-if="look_back(index, tab.annot)"> -->
                                     <div class="col" style="padding-top:7px;">{{ anno.label }}:</div>
                                     <div class="col-8">
-                                        <select class="form-select rev-select" v-model="anno.anno" @change="update_tiers(anno, tab)" :disabled="verify">
+                                        <select class="form-select rev-select" v-model="anno.anno" @change="update_tiers(anno, tab)" :disabled="validate">
                                             <option v-for="(cat, index) in anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
                                     </div>
@@ -435,7 +455,7 @@
                                 <div class="row pb-1" v-if="tab.claim_active">
                                     <div class="col" style="padding-top:7px;">{{ tab.claim_anno.label }}:</div>
                                     <div class="col-8">
-                                        <select class="form-select sup-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)" :disabled="verify">
+                                        <select class="form-select sup-select" v-model="tab.claim_anno.anno" @change="update_colors(tab.claim_anno.anno, tab.label)" :disabled="validate">
                                             <option v-for="(cat, index) in tab.claim_anno.cats" v-bind:value="index">{{ cat }}</option>
                                         </select>
                                     </div>
@@ -458,32 +478,33 @@
 
                                 <div class="row pb-1">
                                     <div class="col">
-                                        <textarea class="form-control" rows="3" placeholder="Comments" v-model="tab.comment" :disabled="verify"></textarea>
+                                        <textarea class="form-control" rows="3" placeholder="Comments" v-model="tab.comment" :disabled="validate"></textarea>
                                     </div>
                                 </div>
 
                                 <div class="row">
 
-                                    <div class="row pb-2">
-                                        <div class="col"><strong>Verification</strong></div>
-                                    </div>
+                                    <div class="col pt-3" v-if="validate">
 
-                                    <div class="col pt-3" v-if="verify">
+                                        <div class="row pb-2">
+                                            <div class="col"><strong>Are the annotations for this abstract acceptable?</strong></div>
+                                        </div>
+
                                         <div class="row mb-3">
                                             <div class="col d-flex justify-content-center">
                                                 <div class="btn-group" role="group" aria-label="Toggle Buttons">
 
-                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'success-outlined-ind' + index" autocomplete="off" v-model="verify_info.tab_verify[index].label">
+                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'success-outlined-ind' + index" autocomplete="off" v-model="validate_info.tab_validate[index].label">
                                                     <label class="btn btn-outline-success" :for="'success-outlined-ind' + index"><b>Agree</b></label>
 
-                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'danger-outlined-ind' + index" autocomplete="off" v-model="verify_info.tab_verify[index].label">
+                                                    <input type="radio" class="btn-check" :name="'options-outlined-ind' + index" :id="'danger-outlined-ind' + index" autocomplete="off" v-model="validate_info.tab_validate[index].label">
                                                     <label class="btn btn-outline-danger" :for="'danger-outlined-ind' + index"><b>Disagree</b></label>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="verify_info.tab_verify[index].rationale"></textarea>
+                                                <textarea class="form-control" rows="3" placeholder="Short rationale" v-model="validate_info.tab_validate[index].rationale"></textarea>
                                             </div>
                                         </div> 
                                     </div>
@@ -520,24 +541,25 @@
                 tab_text: "",
                 tabs: [],
                 drag_tabs: [],
-                verify_info: {
-                    claim_verify: {
+                validate_info: {
+                    claim_validate: {
                         label: "",
                         rationale: "",
                     },
-                    tier_verify: {
+                    tier_validate: {
                         label: "",
                         rationale: "",
                     },
-                    synthesis_verify: {
+                    synthesis_validate: {
                         label: "",
                         rationale: "",
                     },
-                    tab_verify: [],
+                    tab_validate: [],
                 },
                 sub_name: "",
                 o_exp_count: 0,
-                verify: false,
+                validate: false,
+                override: false,
                 non_ver_just: "",
                 non_ver_just_count: 0,
                 nonverifiable: false,
@@ -608,14 +630,15 @@
                 this.load_file_from_sample(urlParams.get('load'));
             }
 
-            if (urlParams.has('verify')) {
-                this.verify_mode();
+            if (urlParams.has('validate')) {
+                this.validate_mode();
             }
 
         },
         methods: {
-            verify_mode(){
-                this.verify = true;
+            validate_mode(){
+                this.validate = true;
+                this.override = true;
             },
             look_back(ind, annot, tab) {
                 if (ind == 0) return true;
@@ -764,20 +787,20 @@
                 this.non_ver_just = "";
                 this.non_ver_just_count = 0;
                 this.nonverifiable = false;
-                this.verify_info = {
-                    claim_verify: {
+                this.validate_info = {
+                    claim_validate: {
                         label: "",
                         rationale: "",
                     },
-                    tier_verify: {
+                    tier_validate: {
                         label: "",
                         rationale: "",
                     },
-                    synthesis_verify: {
+                    synthesis_validate: {
                         label: "",
                         rationale: "",
                     },
-                    tab_verify: [],
+                    tab_validate: [],
                 };
                 this.tiers = [
                     {
@@ -1126,7 +1149,7 @@
                 for (let i = 0; i < docs.length; i++) {
                     console.log("wft");
                     //if (i === 0) console.log(Object.keys(tab_annos).includes('rel_span'));
-                    this.verify_info.tab_verify.push({
+                    this.validate_info.tab_validate.push({
                         label: "",
                         rationale: "",
                     });
@@ -1195,7 +1218,7 @@
                 this.drag_tabs = copy;
 
                 if (Object.keys(this.parsed_file[this.findex]).includes("annotator_verification")) {
-                    this.verify_info = this.parsed_file[this.findex]['annotator_verification'];
+                    this.validate_info = this.parsed_file[this.findex]['annotator_verification'];
                 }
 
                 if (Object.keys(this.parsed_file[this.findex]).includes("claim_annos")) {
@@ -1264,7 +1287,7 @@
                 this.parsed_file[this.findex]['claim_annos']['rewritten_claim'] = this.rewritten_claim_dict;
                 this.parsed_file[this.findex]['claim_annos']['nonverifiable'] = this.nonverifiable;
                 this.parsed_file[this.findex]['claim_annos']['verification_justification'] = this.non_ver_just;
-                this.parsed_file[this.findex]['annotator_verification'] = this.verify_info;
+                this.parsed_file[this.findex]['annotator_verification'] = this.validate_info;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
@@ -1278,7 +1301,7 @@
                 this.support_colors[tab_label] = labels[anno];
             },
             update_flag(tab) {
-                if (this.verify) {
+                if (this.validate) {
                     return;
                 }
                 tab.flagged = !tab.flagged;
@@ -1513,7 +1536,7 @@
 
 
             deleteTier(index) {
-                if (this.verify) {
+                if (this.validate) {
                     return;
                 }
                 this.tiers[index].t_lst.forEach((ele) => this.drag_tabs.push(ele));
