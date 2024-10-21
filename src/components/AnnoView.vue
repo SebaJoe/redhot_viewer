@@ -13,7 +13,7 @@
         </div>
         <div class="row mt-2" v-else>
             <div class="col">
-                This interface is for verifying medical claims made on Reddit posts using retrieved evidence. Complete all annotation according to these <a href="https://docs.google.com/presentation/d/1hz-jw6UKyi0cDkzWuJoKoLTYP4ejuqwR-WPpuZMTg7o/edit?usp=sharing">instructions.</a>
+                This interface is for verifying medical claims made on Reddit posts using retrieved evidence. Complete all annotation according to these <a class="link-offset-1 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="https://docs.google.com/presentation/d/1hz-jw6UKyi0cDkzWuJoKoLTYP4ejuqwR-WPpuZMTg7o/edit?usp=sharing">instructions.</a>
             </div>
         </div>
 
