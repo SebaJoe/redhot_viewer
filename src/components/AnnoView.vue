@@ -192,7 +192,7 @@
                                 </div> 
                             </div>
                         </div>
-                        <div v-if="(override || claim_selected) && !nonverifiable">
+                        <div v-if="(override || claim_selected[findex]) && !nonverifiable">
                             <div class="row">
                                 <div class="col" :class="{ 'col-9': validate }">
                                     <div class="row mt-3">
@@ -352,7 +352,7 @@
                         <div>
                             <div class="row mt-3">
                                 <div class="col d-flex justify-content-center" @click="toggle_selection()">
-                                    <i class="bi bi-chevron-up" style="font-size:20px;" v-if="claim_selected && !nonverifiable"></i>
+                                    <i class="bi bi-chevron-up" style="font-size:20px;" v-if="claim_selected[findex] && !nonverifiable"></i>
                                     <i class="bi bi-chevron-down" style="font-size:20px;" v-else></i>
                                 </div>
                             </div>
@@ -383,14 +383,26 @@
             <div class="col">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Retrieved Abstracts</h5>
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item" v-for="tab in tabs">
-                                <a class="nav-link" @click="setActive(tab)" :class="{ active: tab.isActive }">{{ tab.label }}</a>
-                            </li>
-                        </ul>
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title pt-1">Retrieved Abstracts</h5>
+                                <ul class="nav nav-tabs">
+                                    <li class="nav-item" v-for="tab in tabs">
+                                        <a class="nav-link" @click="setActive(tab)" :class="{ active: tab.isActive }">{{ tab.label }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-3 d-flex align-items-center justify-content-end">
+                                <button class="float-right border border-2" style="background-color: #92de81; border-radius: 27px; padding:0.975rem 1rem; display: inline-flex; float:right;" @click="view_abstracts=true" v-if="!view_abstracts">
+                                    <b>Open</b>
+                                </button>
+                                <button class="float-right border border-2" style="background-color: #de8192; border-radius: 27px; padding:0.975rem 1rem; display: inline-flex; float:right;" @click="view_abstracts=false" v-else>
+                                    <b>Close</b>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body tab-content">
+                    <div class="card-body tab-content" v-if="view_abstracts">
                         <div v-for="(tab, index) in tabs" v-show="tab.isActive">
                             <div class="row">
                             <div class="col">
@@ -567,6 +579,7 @@
                 pop_list:[],
                 inter_list:[],
                 out_list:[],
+                view_abstracts: false,
                 has_rewrite: false,
                 rewritten_claim_dict: {
                     population: "",
@@ -614,7 +627,7 @@
                     "Partially Supports",
                     "Supports",
                 ],
-                claim_selected: false,
+                claim_selected: [],
                 sort_by_relevance: true,
                 selected_claim: "",
             }
@@ -711,7 +724,7 @@
             },
             toggle_selection(){
                 if (!this.nonverifiable) {
-                    this.claim_selected = !this.claim_selected;
+                    this.claim_selected[this.findex] = !this.claim_selected[this.findex];
                 }
             },
             readfile() {
@@ -830,8 +843,8 @@
                     inter_edit: false,
                     res_edit: false,
                 };
+                this.view_abstracts = false;
                 this.has_rewrite = false;
-                this.claim_selected = false;
                 this.selected_claim = "";
                 this.support_colors = {};
                 this.basic_table = {};
@@ -841,6 +854,13 @@
                 this.sort_by_relevance = true;
             },
             load_file() {
+
+                if (this.claim_selected.length == 0) {
+                    for (let i = 0; i < this.parsed_file.length; i++) {
+                        this.claim_selected.push(false);
+                    }
+                }
+
                 this.set_defaults();
 
                 const sub_id_to_population_map = {
@@ -1216,6 +1236,7 @@
                     }
                 }
 
+
                 let copy = JSON.parse(JSON.stringify(this.tabs));
 
                 this.drag_tabs = copy;
@@ -1225,6 +1246,7 @@
                 }
 
                 if (Object.keys(this.parsed_file[this.findex]).includes("claim_annos")) {
+
                     let claim_annos = this.parsed_file[this.findex]['claim_annos'];
                     this.sort_by_relevance = claim_annos['sort_by_relevance'];
                     console.log("FOREE");
@@ -1239,6 +1261,7 @@
                     this.rewritten_claim_dict = (Object.keys(claim_annos).includes("rewritten_claim")) ? claim_annos['rewritten_claim'] : this.rewritten_claim_dict;
                     this.nonverifiable = (Object.keys(claim_annos).includes("nonverifiable")) ? claim_annos['nonverifiable'] : this.nonverifiable;
                     this.non_ver_just = (Object.keys(claim_annos).includes("nonverifiable")) ? claim_annos['verification_justification'] : this.non_ver_just;
+                    this.view_abstracts = (Object.keys(claim_annos).includes("view_abstracts")) ? claim_annos['view_abstracts'] : this.view_abstracts;
                     if (Object.keys(claim_annos).includes('support_labels')) {
                         this.support_labels = claim_annos['support_labels'];
                     } else {
@@ -1259,6 +1282,17 @@
                             description: claim_annos['tiers'][i]['description'],
                         });
                     }
+
+                    if (!this.view_abstracts && !Object.keys(claim_annos).includes("view_abstracts")) {
+                        for (let i = 0; i < this.tabs.length; i++) {
+                            for (let j = 0; j < this.tabs[i].rel_anno.length; j++) {
+                                if (this.tabs[i].rel_anno[j].label != 0) {
+                                    this.view_abstracts = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
                 this.get_count();
                 this.get_count_non_ver_just();
@@ -1276,6 +1310,7 @@
                         flagged: tab.flagged,
                     };
                 });
+
                 this.parsed_file[this.findex]['claim_annos'] = {};
                 this.parsed_file[this.findex]['claim_annos']['annotated_claim'] = this.selected_claim; 
                 this.parsed_file[this.findex]['claim_annos']['drag_tabs'] = this.drag_tabs.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title));
@@ -1291,6 +1326,7 @@
                 this.parsed_file[this.findex]['claim_annos']['nonverifiable'] = this.nonverifiable;
                 this.parsed_file[this.findex]['claim_annos']['verification_justification'] = this.non_ver_just;
                 this.parsed_file[this.findex]['annotator_verification'] = this.validate_info;
+                this.parsed_file[this.findex]['claim_annos']['view_abstracts'] = this.view_abstracts;
                 for (let i = 0; i < this.tiers.length; i++) {
                     this.parsed_file[this.findex]['claim_annos']['tiers'].push({
                         t_lst: this.tiers[i].t_lst.map((tab) => this.tabs.map((t) => t.title).indexOf(tab.title)),
