@@ -826,6 +826,9 @@
                     population: "",
                     intervention: "",
                     outcome: "",
+                    pop_edit: false,
+                    inter_edit: false,
+                    res_edit: false,
                 };
                 this.has_rewrite = false;
                 this.claim_selected = false;
