@@ -1,6 +1,6 @@
 # redhot_viewer
 
-This template should help get you started developing with Vue 3 in Vite.
+This is the annotation interface used to conduct the fact-checking of claims from the RedHOT dataset by medical experts. 
 
 ## Recommended IDE Setup
 
